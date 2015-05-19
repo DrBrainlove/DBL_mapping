@@ -1,5 +1,6 @@
 import os,csv, math, collections
 
+
 bars=[]
 with open("node_info_old.csv","rb") as f: #old coordinates but still has right bar mapping
    rdr=csv.reader(f)
@@ -91,6 +92,46 @@ for bar in cross_module_bars:
 		crossbars+=barlength
 	except:
 		print "eh",bar
+
+
+#Write out the pixel mappings to read into the model
+with open("pixel_mapping.csv","wb") as f:
+	wrtr=csv.writer(f)
+	pixel_counter=0
+	led_spacing=0.656168 #inches. the model is in inches. TODO: Use millimeters. One day we will be free from tyanny. And inches.
+	wrtr.writerow(["Pixel_i","Module","Node1","Node2","X","Y","Z"])
+	for modul in module_dict:
+		module_distances[modul]=0.0
+		nods=module_dict[modul]
+		for bar in bars:
+			in_module=True
+			for barnode in bar:
+				if barnode not in nods:
+					in_module=False
+			if in_module:
+				barnods=list(bar)
+				#for consistency start from the lowest x-coordinate and set all the bars that way.
+				#also helps keep track of when the strip hits the end of the bar
+				if node_module_xyz[barnods[0]+"-"+str(modul)][0]<node_module_xyz[barnods[1]+"-"+str(modul)][0]:
+					nod1=node_module_xyz[barnods[0]+"-"+str(modul)]
+					nod2=node_module_xyz[barnods[1]+"-"+str(modul)]
+					node_1_name=barnods[0]
+					node_2_name=barnods[1]
+				else:
+					nod1=node_module_xyz[barnods[1]+"-"+str(modul)]
+					nod2=node_module_xyz[barnods[0]+"-"+str(modul)]
+					node_1_name=barnods[1] 
+					node_2_name=barnods[0]
+
+				barlen=xyz_dist(node_module_xyz[barnods[0]+"-"+str(modul)],node_module_xyz[barnods[1]+"-"+str(modul)])
+				dx=(nod2[0]-nod1[0])/barlen*led_spacing
+				dy=(nod2[1]-nod1[1])/barlen*led_spacing
+				dz=(nod2[2]-nod1[2])/barlen*led_spacing
+				pixel=nod1		
+				while pixel[0]<nod2[0]:
+					pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
+					pixel_counter+=1
+					wrtr.writerow([pixel_counter,modul,node_1_name,node_2_name]+pixel)
 
 
 total_bars_length=0.0
