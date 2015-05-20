@@ -3,7 +3,7 @@ import os,csv, math, collections
 
 bars=[]
 node_connections = collections.defaultdict()
-with open("node_info_old.csv","rb") as f: #old coordinates but still has right bar mapping
+with open("node_info_DBL1.csv","rb") as f: #old coordinates but still has right bar mapping
    rdr=csv.reader(f)
    rdr.next()
    for line in rdr:
@@ -28,7 +28,7 @@ module_dict=collections.defaultdict()
 def xyz_dist(point1,point2):
 	return math.sqrt(math.pow((point2[0]-point1[0]),2) +  math.pow((point2[1]-point1[1]),2) + math.pow((point2[2]-point1[2]),2))
 
-with open("node_locations_150501.csv","rU") as f:
+with open("DBL2_node_locations_150501.csv","rU") as f:
 	rdr=csv.reader(f)
 	rdr.next()
 	for line in rdr:
