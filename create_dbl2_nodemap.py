@@ -139,7 +139,7 @@ if __name__ == "__main__":
     # is a partial list of dropped bars in the "Brain_struts_Register-01-15-15.xlsx"
     # MJP created this subset from that list
     missingbars = []
-    with open("DBL2_missing_edges.csv", "rb") as f:
+    with open("DBL2_registry_missingedges.csv", "rb") as f:
         reader = csv.reader(f)
         reader.next() # skip two comment lines
         reader.next()
