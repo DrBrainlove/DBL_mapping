@@ -28,7 +28,7 @@ module_dict=collections.defaultdict()
 def xyz_dist(point1,point2):
 	return math.sqrt(math.pow((point2[0]-point1[0]),2) +  math.pow((point2[1]-point1[1]),2) + math.pow((point2[2]-point1[2]),2))
 
-with open("node_locations_150501.csv","rU") as f:
+with open("node_locations_150501_zeroed.csv","rU") as f:
 	rdr=csv.reader(f)
 	rdr.next()
 	for line in rdr:
