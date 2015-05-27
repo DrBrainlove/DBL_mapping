@@ -1,9 +1,11 @@
 import os,csv, math, collections
 
 
+ground_nodes = ["WAX","AIM","LID","BOX","HUG","FLU","SIR","ONO","TAT","COP","NEW","GET","OAK","CAB","AMP","YAY","HAY","BAM","CIS","OFF","WHO","NIX","PIE","RUM","SIP"]
+
 bars=[]
 node_connections = collections.defaultdict()
-with open("node_info_old.csv","rb") as f: #old coordinates but still has right bar mapping
+with open("node_info_DBL1.csv","rb") as f: #old coordinates but still has right bar mapping
    rdr=csv.reader(f)
    rdr.next()
    for line in rdr:
@@ -249,13 +251,17 @@ for nod in node_module_xyz:
 	nod_bars='_'.join(nod_bars)
 	nod_nods_w_modules='_'.join(nod_nods_w_modules)
 	nod_bars_w_modules='_'.join(nod_bars_w_modules)
+	if nodenam in ground_nodes:
+		ground="1"
+	else:
+		ground="0"
 
-	nodes_dict[nodenam]=[nodenam]+nod_xyz+[subnods,nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules]
-	nodes_modules_dict[nod]=[nod,nodenam,modul]+xyz+[nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules]
+	nodes_dict[nodenam]=[nodenam]+nod_xyz+[subnods,nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules,ground]
+	nodes_modules_dict[nod]=[nod,nodenam,modul]+xyz+[nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules,ground]
 
 with open("Model_Node_Info.csv","wb") as f:
 	wrtr=csv.writer(f)
-	wrtr.writerow(["Node","X","Y","Z","Subnodes","Neighbor_Nodes","Bars","Bars_with_Module_Nums","Nodes_with_Module_Nums"])
+	wrtr.writerow(["Node","X","Y","Z","Subnodes","Neighbor_Nodes","Bars","Bars_with_Module_Nums","Nodes_with_Module_Nums","Ground"])
 	for nod in nodes_dict:
 		wrtr.writerow(nodes_dict[nod])
 
@@ -263,7 +269,7 @@ with open("Model_Node_Info.csv","wb") as f:
 
 with open("Structural_Node_Info.csv","wb") as f:
 	wrtr=csv.writer(f)
-	wrtr.writerow(["Node_with_Module","Node","Module","X","Y","Z","Neighbor_Nodes","Bars","Bars_with_Module_Nums","Nodes_with_Module_Nums"])
+	wrtr.writerow(["Node_with_Module","Node","Module","X","Y","Z","Neighbor_Nodes","Bars","Bars_with_Module_Nums","Nodes_with_Module_Nums","Ground"])
 	for nod in nodes_modules_dict:
 		wrtr.writerow(nodes_modules_dict[nod])
 

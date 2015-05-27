@@ -1,0 +1,24 @@
+"# DBL2 extra edges: were in DBL1, not in DBL2",,
+"# this is a subset, and likely not complete! Check in code",,
+2,ACE,DUI
+1,ADO,ELF
+1,ADO,WET
+1,ARM,BRO
+1,ASK,FRO
+2,ASK,FRO
+2,BAH,BAM
+2,BAH,WIN
+2,BAM,CIS
+2,DIG,JOY
+1,DIG,JOY
+1,FEW,GAL
+1,FEW,HOW
+1,FEW,PIE
+1,FRO,OFF
+2,FRO,OFF
+2,GAS,IVY
+2,GAS,TUX
+2,IVY,LUG
+2,OFF,WHO
+1,OFF,WHO
+1,PIE,RUM
