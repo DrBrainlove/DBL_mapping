@@ -118,7 +118,7 @@ with open("pixel_mapping.csv","wb") as f:
 	wrtr=csv.writer(f)
 	pixel_counter=0
 	led_spacing=0.656168 #inches. the model is in inches. TODO: Use millimeters. One day we will be free from tyanny. And inches.
-	wrtr.writerow(["Pixel_i","Module","Node1","Node2","X","Y","Z"])
+	wrtr.writerow(["Pixel_i","Module1","Module2","Node1","Node2","X","Y","Z"])
 	for modul in module_dict:
 		module_distances[modul]=0.0
 		nods=module_dict[modul]
@@ -153,12 +153,12 @@ with open("pixel_mapping.csv","wb") as f:
 					while pixel[0]<nod2[0]:
 						pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
 						pixel_counter+=1
-						wrtr.writerow([pixel_counter,modul,node_1_name,node_2_name]+pixel)
+						wrtr.writerow([pixel_counter,modul,modul,node_1_name,node_2_name]+pixel)
 				else:
 					while pixel[0]>nod2[0]:
 						pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
 						pixel_counter+=1
-						wrtr.writerow([pixel_counter,modul,node_1_name,node_2_name]+pixel)
+						wrtr.writerow([pixel_counter,modul,modul,node_1_name,node_2_name]+pixel)
 
 	#same monkey, different banana
 	for bar in cross_module_bars:
@@ -191,12 +191,12 @@ with open("pixel_mapping.csv","wb") as f:
 				while pixel[0]<nod2[0]:
 					pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
 					pixel_counter+=1
-					wrtr.writerow([pixel_counter,crossbar_modul,node_1_name,node_2_name]+pixel)
+					wrtr.writerow([pixel_counter,crossbar_modul,other_modul,node_1_name,node_2_name]+pixel)
 			else:
 				while pixel[0]>nod2[0]:
 					pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
 					pixel_counter+=1
-					wrtr.writerow([pixel_counter,crossbar_modul,node_1_name,node_2_name]+pixel)
+					wrtr.writerow([pixel_counter,crossbar_modul,other_modul,node_1_name,node_2_name]+pixel)
 
 
 
