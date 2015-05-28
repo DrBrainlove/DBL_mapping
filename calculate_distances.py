@@ -261,7 +261,7 @@ for nod in node_module_xyz:
 
 with open("Model_Node_Info.csv","wb") as f:
 	wrtr=csv.writer(f)
-	wrtr.writerow(["Node","X","Y","Z","Subnodes","Neighbor_Nodes","Bars","Bars_with_Module_Nums","Nodes_with_Module_Nums","Ground"])
+	wrtr.writerow(["Node","X","Y","Z","Subnodes","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground"])
 	for nod in nodes_dict:
 		wrtr.writerow(nodes_dict[nod])
 
@@ -269,7 +269,7 @@ with open("Model_Node_Info.csv","wb") as f:
 
 with open("Structural_Node_Info.csv","wb") as f:
 	wrtr=csv.writer(f)
-	wrtr.writerow(["Node_with_Module","Node","Module","X","Y","Z","Neighbor_Nodes","Bars","Bars_with_Module_Nums","Nodes_with_Module_Nums","Ground"])
+	wrtr.writerow(["Node_with_Module","Node","Module","X","Y","Z","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground"])
 	for nod in nodes_modules_dict:
 		wrtr.writerow(nodes_modules_dict[nod])
 
