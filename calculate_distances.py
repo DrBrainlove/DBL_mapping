@@ -26,6 +26,7 @@ with open("node_info_DBL1.csv","rb") as f: #old coordinates but still has right 
 node_xyz=collections.defaultdict()
 node_module_xyz=collections.defaultdict()
 module_dict=collections.defaultdict()
+bars_dict = collections.defaultdict()
 
 def xyz_dist(point1,point2):
 	return math.sqrt(math.pow((point2[0]-point1[0]),2) +  math.pow((point2[1]-point1[1]),2) + math.pow((point2[2]-point1[2]),2))
@@ -112,6 +113,9 @@ for bar in to_bar_or_not_to_bar:
 bars_with_module_nums=[]
 crossbars_with_module_nums=[]
 
+model_bars=collections.defaultdict()
+physical_bars=collections.defaultdict()
+
 #Write out the pixel mappings to read into the model
 #TODO figure out a heuristic for which modules the cross bars attach to and add them into the model. They're currently absent.
 with open("pixel_mapping.csv","wb") as f:
@@ -142,8 +146,6 @@ with open("pixel_mapping.csv","wb") as f:
 				#figure out if the alphabetically ordered nodes are increasing or decreasing in the x-direction for 
 				#iteratively adding LEDs down it
 				forward_x = nod1[0]<nod2[0]
-
-
 				barlen=xyz_dist(nod1,nod2)
 				dx=(nod2[0]-nod1[0])/barlen*led_spacing
 				dy=(nod2[1]-nod1[1])/barlen*led_spacing
@@ -153,12 +155,18 @@ with open("pixel_mapping.csv","wb") as f:
 					while pixel[0]<nod2[0]:
 						pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
 						pixel_counter+=1
-						wrtr.writerow([pixel_counter,modul,modul,node_1_name,node_2_name]+pixel)
+						wrtr.writerow([pixel_counter,modul,node_1_name,node_2_name]+pixel)
 				else:
 					while pixel[0]>nod2[0]:
 						pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
 						pixel_counter+=1
 						wrtr.writerow([pixel_counter,modul,modul,node_1_name,node_2_name]+pixel)
+
+
+
+
+
+
 
 	#same monkey, different banana
 	for bar in cross_module_bars:
@@ -200,6 +208,11 @@ with open("pixel_mapping.csv","wb") as f:
 
 
 
+
+
+
+
+
 nodes_dict=collections.defaultdict()
 nodes_modules_dict = collections.defaultdict()
 for nod in node_module_xyz:
@@ -220,17 +233,17 @@ for nod in node_module_xyz:
 	nod_bars_w_modules=[]
 	for bar in bars:
 		sbar = sorted(bar)
-		if nodenam in sbar:
+		if nodenam in sbar and "FEW" not in sbar:
 			nod_bars.append(sbar[0]+"-"+sbar[1])
 			for snod in sbar:
-				if snod != nodenam:
+				if snod != nodenam and "FEW" not in snod:
 					nod_nods.append(snod)
 	for barwmn in bars_with_module_nums:
 		if nodenam in barwmn:
 			nod_bars_w_modules.append(barwmn)
 			nod1,nod2,modul=barwmn.split('-')
 			for nodd in [nod1,nod2]:
-				if nodd!=nodenam:
+				if nodd!=nodenam and "FEW" not in nodd:
 					nod_nods_w_modules.append(nodd+"-"+str(modul))
 	for xbarwmn in crossbars_with_module_nums:
 		if nodenam in xbarwmn:
@@ -239,7 +252,7 @@ for nod in node_module_xyz:
 			nodmod1=nod1+"-"+str(modul1)
 			nodmod2=nod2+"-"+str(modul2)
 			for nodd in [nod1,nod2]:
-				if nodd!=nodenam:
+				if nodd!=nodenam and "FEW" not in nodd:
 					if nodd==nod1:
 						nod_nods_w_modules.append(nodmod1)
 					else:
@@ -259,6 +272,85 @@ for nod in node_module_xyz:
 	nodes_dict[nodenam]=[nodenam]+nod_xyz+[subnods,nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules,ground]
 	nodes_modules_dict[nod]=[nod,nodenam,modul]+xyz+[nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules,ground]
 
+
+
+
+for bar in bars:
+	if 'FEW' not in bar:
+		sbar = sorted(bar)
+		barstr='-'.join(sbar)
+		if sbar[0] in ground_nodes and sbar[1] in ground_nodes:
+			ground=1
+		else:
+			ground=0
+		nodenams = '_'.join(sbar)
+		testnam = '-'.join(sbar)
+		physbars=[]
+		physnods=[]
+		moduls=[]
+		for mbar in bars_with_module_nums:
+			if testnam in mbar:
+				physbars.append(mbar)
+				nodone,nodtoo,modnum=mbar.split('-')
+				physnods.append(nodone+"-"+modnum)
+				physnods.append(nodtoo+"-"+modnum)
+				moduls.append(str(modnum))
+		for mbar in crossbars_with_module_nums:
+			if sbar[0] in mbar and sbar[1] in mbar:
+				physbars.append('-'.join(mbar.split('-')[:3]))
+				nodone,nodtoo,modulone,modultoo=mbar.split('-')
+				physnods.append(nodone+"-"+modulone)
+				physnods.append(nodtoo+"-"+modultoo)
+				moduls.append(str(modulone))
+		moduls='_'.join(moduls)
+		min_x=10000
+		min_y=10000
+		min_z=10000
+		max_x=-10000
+		max_y=-10000
+		max_z=-10000
+		for physnod in physnods:
+			xyz=node_module_xyz[physnod]
+			if xyz[0]<min_x:
+				min_x=xyz[0]
+			if xyz[1]<min_y:
+				min_y=xyz[1]
+			if xyz[2]<min_z:
+				min_z=xyz[2]
+			if xyz[0]>max_x:
+				max_x=xyz[0]
+			if xyz[1]>max_y:
+				max_y=xyz[1]
+			if xyz[2]>max_z:
+				max_z=xyz[2]
+		physbars='_'.join(physbars)
+		physnods='_'.join(physnods)
+		adjacent_nods=[]
+		adjacent_phys_nods=[]
+		adjacent_bars=[]
+		adjacent_phys_bars=[]
+		for nod in sbar:
+			too_much_data=nodes_dict[nod]
+			nod_nods=too_much_data[5].split('_')		
+			for nodnod in nod_nods:
+				if nodnod not in nodenams and nodnod not in adjacent_nods and 'FEW' not in nodnod:
+					adjacent_nods.append(nodnod)
+			nod_pnods=too_much_data[8].split('_')		
+			for pnodnod in nod_pnods:
+				if pnodnod not in physnods and pnodnod not in adjacent_nods and 'FEW' not in pnodnod:
+					adjacent_phys_nods.append(pnodnod)
+			nod_bars=too_much_data[6].split('_')
+			for nodbar in nod_bars:
+				if nodbar!=barstr and nodbar not in adjacent_bars and 'FEW' not in nodbar:
+					adjacent_bars.append(nodbar)
+			nod_pbars=too_much_data[7].split('_')
+			for pnodbar in nod_pbars:
+				if pnodbar not in physbars and pnodbar not in adjacent_phys_bars and 'FEW' not in pnodbar:
+					adjacent_phys_bars.append(pnodbar)
+		bars_dict[barstr]=[barstr,moduls,min_x,min_y,min_z,max_x,max_y,max_z,nodenams,physbars,adjacent_nods,physnods,adjacent_phys_bars,adjacent_bars,adjacent_phys_nods,ground]
+
+
+
 with open("Model_Node_Info.csv","wb") as f:
 	wrtr=csv.writer(f)
 	wrtr.writerow(["Node","X","Y","Z","Subnodes","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground"])
@@ -272,6 +364,13 @@ with open("Structural_Node_Info.csv","wb") as f:
 	wrtr.writerow(["Node_with_Module","Node","Module","X","Y","Z","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground"])
 	for nod in nodes_modules_dict:
 		wrtr.writerow(nodes_modules_dict[nod])
+
+
+with open("Model_Bar_Info.csv","wb") as f:
+	wrtr=csv.writer(f)
+	wrtr.writerow(["Bar_name","Modules","Min_X","Min_Y","Min_Z","Max_X","Max_Y","Max_Z","Nodes","Physical_Bars","Physical_Nodes","Adjacent_Nodes","Adjacent_Physical_Bars","Adjacent_Bars","Adjacent_Physical_Nodes","Ground"])
+	for bar in bars_dict:
+		wrtr.writerow(bars_dict[bar])
 
 
 
