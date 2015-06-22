@@ -1,7 +1,136 @@
-import os,csv, math, collections
+import os,csv, math, collections, random
 
 
 ground_nodes = ["WAX","AIM","LID","BOX","HUG","FLU","SIR","ONO","TAT","COP","NEW","GET","OAK","CAB","AMP","YAY","HAY","BAM","CIS","OFF","WHO","NIX","PIE","RUM","SIP"]
+
+
+
+def make_bars_subset(bars_target=400):
+
+	#copied and pasted from below. not optimized at all and not worth trimming. this is just to load the whole bar map to whittle down from
+	bars=[]
+	node_connections = collections.defaultdict()
+	with open("node_info_DBL1.csv","rb") as f: #old coordinates but still has right bar mapping
+	   rdr=csv.reader(f)
+	   rdr.next()
+	   for line in rdr:
+	      startnod=line[0]
+	      for x in [4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34]:
+	         if len(line)>=x+1:
+	            endnod=line[x]
+	            nodes_set=set([startnod,endnod])
+	            if "FEW" not in nodes_set:
+		            if startnod not in node_connections:
+		            	node_connections[startnod]=[]
+		            node_connections[startnod].append(endnod)
+		            if endnod not in node_connections:
+		            	node_connections[endnod]=[]
+		            node_connections[endnod].append(startnod)
+		            if nodes_set not in bars: #avoid duplicates
+			            bars.append(nodes_set)
+
+
+	bars_subset_test = bars
+	max_connected_nodes = 0
+	node_connection_numbers=collections.defaultdict()
+
+	for bar in bars:
+		for nod in bar:
+			bars_connected=0
+			for barrrr in bars:
+				if nod in barrrr:
+					bars_connected+=1
+			if bars_connected > max_connected_nodes:
+				max_connected_nodes = bars_connected
+			node_connection_numbers[nod]=bars_connected
+
+	node_connected_cutoff=max_connected_nodes
+	plz_keep_a_mesh=3
+	
+	while len(bars_subset_test) > bars_target:
+		bars_removed_this_round=0
+		remove_these=[]
+		for node in node_connection_numbers:
+			if node_connection_numbers[node]>=node_connected_cutoff:
+				connected_bars=[]
+				for barrrr in bars_subset_test:
+					if node in barrrr:
+						connected_bars.append(barrrr)
+				random_removal_candidate=random.choice(connected_bars)
+				rrc_nodes=sorted(list(random_removal_candidate))
+
+				bar_is_okay_to_remove=True
+				
+				#see if the bar is going to create something jutting off into space
+				for potentialremovenod in rrc_nodes:
+					connected_bars_to_node=0
+					for subsetbar in bars_subset_test:
+						if potentialremovenod in subsetbar:
+							connected_bars_to_node+=1
+					if connected_bars_to_node<plz_keep_a_mesh:
+						bar_is_okay_to_remove=False
+
+				#no removing ground bars
+				if rrc_nodes[0] in ground_nodes and rrc_nodes[1] in ground_nodes:
+					bar_is_okay_to_remove=False
+
+				if bar_is_okay_to_remove and random_removal_candidate not in remove_these:
+					remove_these.append(random_removal_candidate)
+
+
+		for removebar in remove_these:
+			bars_subset_test.remove(removebar)
+			bars_removed_this_round+=1
+
+		if bars_removed_this_round==0:
+			node_connected_cutoff-=1
+			print node_connected_cutoff
+
+
+		for bar in bars_subset_test:
+			for nod in bar:
+				bars_connected=0
+				for barrrr in bars_subset_test:
+					if nod in barrrr:
+						bars_connected+=1
+				node_connection_numbers[nod]=bars_connected
+
+		"""
+		for bar in bars_subset_test:
+			lbar=sorted(list(bar))
+			node1=lbar[0]
+			node2=lbar[1]
+			groundbar=False
+			if node1 in ground_nodes and node2 in ground_nodes:
+				groundbar=True
+			node1conns=0
+			node2conns=0
+			for barrrr in bars_subset_test:
+				if node1 in barrrr:
+					node1conns+=1
+				if node2 in barrrr:
+					node2conns+=1
+			if node1conns >= node_connected_cutoff and node2conns <= node_connected_cutoff and bar not in remove_these and not groundbar:
+				remove_these.append(bar)
+		for removebar in remove_these:
+			bars_subset_test.remove(removebar)
+			bars_removed_this_round+=1
+		if bars_removed_this_round==0:
+			node_connected_cutoff+=1
+			print node_connected_cutoff"""
+
+	print len(bars_subset_test)
+
+	outputbarlist=[] 
+
+	for bar in bars_subset_test:
+		outputbarlist.append('-'.join(sorted(list(bar))))
+
+	return outputbarlist
+
+
+
+
 
 
 def xyz_dist(point1,point2):
@@ -41,8 +170,14 @@ active_bars = ["NIL-AHI","NIL-TOY","NIL-EON","NIL-JOB","NIL-JUG","NIL-ERA","NIL-
 partialBrainSubset = BarSubset(active_bars,filename_append)
 bar_subsets.append(partialBrainSubset)
 
-for bar_subset in bar_subsets:
 
+#PUT THE EXPERIMENTAL BAR SUBSET HERE
+filename_append = "Algorithmic_Brain"
+active_bars = make_bars_subset(400)
+algorithmicBrainSubset = BarSubset(active_bars,filename_append)
+bar_subsets.append(algorithmicBrainSubset)
+
+for bar_subset in bar_subsets:
 	#load things from the object
 	active_nodes = bar_subset.active_nodes
 	active_bars = bar_subset.active_bars
