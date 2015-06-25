@@ -1,4 +1,4 @@
-import os,csv, math, collections, random
+import os,csv, math, collections, random,sys
 
 
 ground_nodes = ["WAX","AIM","LID","BOX","HUG","FLU","SIR","ONO","TAT","COP","NEW","GET","OAK","CAB","AMP","YAY","HAY","BAM","CIS","OFF","WHO","NIX","PIE","RUM","SIP"]
@@ -126,11 +126,175 @@ def make_bars_subset(bars_target=400):
 	for bar in bars_subset_test:
 		outputbarlist.append('-'.join(sorted(list(bar))))
 
+	for b in outputbarlist:
+		print b
 	return outputbarlist
 
 
+def subset_shells(target=350):
+	
+	all_bars = ['HAY-SAW',
+'BOX-VAN',
+'HIT-SUN',
+'FOX-SKY',
+'FLY-OAR',
+'LAB-YAK',
+'DUH-MOP',
+'HIP-SAD',
+'HOT-OLD',
+'ALA-FLY',
+'JAM-ZOO',
+'FOR-OAK',
+'ASK-FRO',
+'ART-MAD',
+'AHI-EON',
+'BOY-ORC',
+'CHI-KIT',
+'GEL-MOO',
+'KEG-WAS',
+'ALL-SAD',
+'JAM-MOO',
+'ALA-INK',
+'LEG-RAW',
+'DRY-FUN',
+'DUB-WAR',
+'JOB-TOY',
+'DIG-TUB',
+'ALA-MIX',
+'ONO-USE',
+'OAR-ZIG',
+'EYE-SUN',
+'OAK-ROB',
+'EGG-FOR',
+'SAY-WIZ',
+'WAS-ZOO',
+'BOX-EGO',
+'EGG-MOO',
+'FEW-GAL',
+'GAS-TUX',
+'JOB-NAY',
+'BRO-HIT',
+'HAM-ZZZ',
+'AIM-MIX',
+'ICE-SAY',
+'HIP-NEW',
+'HAY-WIN',
+'FIG-KEY',
+'GEL-PHI',
+'PAY-WIN',
+'JOY-RAW',
+'FOX-TUX',
+'AIR-ODD',
+'PAW-SAY',
+'EYE-GAS',
+'BIO-JOY',
+'DIG-HIT',
+'LAM-TRY',
+'ASK-TUB',
+'PRO-YAK',
+'KIT-ONO',
+'IRE-RIB',
+'MAC-POP',
+'BRO-EON',
+'PAY-TUX',
+'KEG-WHY',
+'DIG-JOY',
+'FOG-TRY',
+'FOG-RIB',
+'GAS-ODD',
+'FAN-FUN',
+'EGO-OAR',
+'ALL-EGG',
+'JUG-MOP',
+'BOA-SHY',
+'EVE-FAX',
+'PAY-WHY',
+'SAW-WHY',
+'SAY-ZIG',
+'BAR-FLU',
+'FLU-VAN',
+'BOA-NAY',
+'ARM-DUB',
+'CHI-DOG',
+'HOT-PRO',
+'FOR-HIP',
+'ASK-ORC',
+'INK-MAY',
+'AHI-IRE',
+'ART-KIT',
+'HEX-MIX',
+'DUB-TOY',
+'ARM-BIO',
+'JUG-RIB',
+'SKY-SUN',
+'KEG-ODD',
+'PHI-SAW',
+'CHI-MAD',
+'FLY-WIZ',
+'NEW-USE',
+'FEW-SHY',
+'ALL-PRO',
+'AMP-SAW',
+'DRY-SHY',
+'FAN-ZZZ',
+'DUH-HAM',
+'FOG-OLD',
+'EVE-IRE',
+'ASH-LAM',
+'EON-POP',
+'USE-WIG',
+'AHI-JUG',
+'HAM-ICE',
+'BAR-DOG',
+'EYE-POP',
+'BOA-WAR',
+'ART-FIG',
+'HEX-MAY',
+'BAH-WIN',
+'GAL-WAR',
+'BAR-ONO',
+'EON-TOY',
+'FIG-YAK',
+'MIX-OAR',
+'DRY-FLY',
+'GAL-RAD',
+'AIR-MAC',
+'LAB-LAM',
+'LEG-OVA',
+'BOY-FOX',
+'FUN-NAY',
+'ART-ASH',
+'ARM-BRO',
+'KEY-WIG',
+'KEY-SAD',
+'ICE-MAD',
+'IRE-MAC',
+'DUH-TRY',
+'FRO-RAW',
+'SKY-TUB',
+'BAH-BOY',
+'INK-SHY',
+'FAN-MOP',
+'WIZ-ZZZ',
+'OVA-RAD',
+'BIO-RAD',
+'AIM-EGO',
+'JOB-JUG',
+'GEL-ROB',
+'PAW-VAN',
+'FAX-ZOO',
+'HOT-JAM',
+'AIR-FAX',
+'LAB-OLD',
+'AMP-ROB',
+'ASH-HAM',
+'PAW-ZIG',
+'KIT-WIG',
+'EVE-OLD',
+'PHI-WAS',
+'DOG-PAW']
 
-
+	return all_bars
 
 
 def xyz_dist(point1,point2):
@@ -157,27 +321,33 @@ class BarSubset(object):
 #No module numbers (ABC-DEF not ABC-DEF1) but don't worry about typing them in alphabetically, the object code will handle that.
 #Should be sufficient for figuring out which bars to use since P2LX code already just uses the z-highest of any double bars.
 #what to append to filename ("full", "one_third_bars", "module_14", etc)
-bar_subsets = []
+# bar_subsets = []
 
-filename_append = "Full_Brain"
-active_bars = [] #null value is treated as "just use everything"
-fullBrainSubset = BarSubset(active_bars,filename_append)
-bar_subsets.append(fullBrainSubset)
+# filename_append = "Full_Brain"
+# active_bars = [] #null value is treated as "just use everything"
+# fullBrainSubset = BarSubset(active_bars,filename_append)
+# bar_subsets.append(fullBrainSubset)
 
-#PUT THE EXPERIMENTAL BAR SUBSET HERE
-filename_append = "Partial_Brain"
-active_bars = ["NIL-AHI","NIL-TOY","NIL-EON","NIL-JOB","NIL-JUG","NIL-ERA","NIL-ADO","JOB-ADO","JOB-NAY","JOB-NIL","JOB-JUG","JOB-TOY","JUG-ERA","JUG-RIB","JUG-SOY","JUG-AHI"] # BAR LIST GOES HERE
-partialBrainSubset = BarSubset(active_bars,filename_append)
-bar_subsets.append(partialBrainSubset)
+# #PUT THE EXPERIMENTAL BAR SUBSET HERE
+# filename_append = "Partial_Brain"
+# active_bars = ["NIL-AHI","NIL-TOY","NIL-EON","NIL-JOB","NIL-JUG","NIL-ERA","NIL-ADO","JOB-ADO","JOB-NAY","JOB-NIL","JOB-JUG","JOB-TOY","JUG-ERA","JUG-RIB","JUG-SOY","JUG-AHI"] # BAR LIST GOES HERE
+# partialBrainSubset = BarSubset(active_bars,filename_append)
+# bar_subsets.append(partialBrainSubset)
 
 
-#PUT THE EXPERIMENTAL BAR SUBSET HERE
-filename_append = "Algorithmic_Brain"
-active_bars = make_bars_subset(400)
-algorithmicBrainSubset = BarSubset(active_bars,filename_append)
-bar_subsets.append(algorithmicBrainSubset)
+# #PUT THE EXPERIMENTAL BAR SUBSET HERE
+# filename_append = "Algorithmic_Brain"
+# active_bars = make_bars_subset(300)
+# algorithmicBrainSubset = BarSubset(active_bars,filename_append)
+# bar_subsets.append(algorithmicBrainSubset)
 
-for bar_subset in bar_subsets:
+# #PUT THE EXPERIMENTAL BAR SUBSET HERE
+# filename_append = "Shell_Brain"
+# active_bars = subset_shells()
+# shellBrainSubset = BarSubset(active_bars,filename_append)
+# bar_subsets.append(shellBrainSubset)
+
+def process_bar_subset(bar_subset, filename_append='_'):
 	#load things from the object
 	active_nodes = bar_subset.active_nodes
 	active_bars = bar_subset.active_bars
@@ -587,3 +757,12 @@ for bar_subset in bar_subsets:
 	print "Average bar length (with duplicates and cross bars): ",total_bars_length/total_bars*0.0254,"m"
 	print "Total number of bars (with duplicates and cross bars): ",total_bars
 	print "Also, node FEW seems to be missing from the new node coordinates (5 bars attached)"
+
+
+if __name__ == '__main__':
+	active_bars = [bar.strip() for bar in open(sys.argv[1], 'r')]
+	filename_append = sys.argv[2]
+
+	bar_subset = BarSubset(active_bars, filename_append)
+
+	process_bar_subset(bar_subset)
