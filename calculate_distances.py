@@ -1,4 +1,4 @@
-import os,csv, math, collections, random,sys
+import os,csv, math, collections, random,sys, argparse
 
 
 ground_nodes = ["WAX","AIM","LID","BOX","HUG","FLU","SIR","ONO","TAT","COP","NEW","GET","OAK","CAB","AMP","YAY","HAY","BAM","CIS","OFF","WHO","NIX","PIE","RUM","SIP"]
@@ -758,10 +758,15 @@ def process_bar_subset(bar_subset, filename_append='_'):
 	print "Total number of bars (with duplicates and cross bars): ",total_bars
 	print "Also, node FEW seems to be missing from the new node coordinates (5 bars attached)"
 
+parser = argparse.ArgumentParser()
+parser.add_argument("bar_file", help="a csv containing one bar per line of the form SOM-BAR")
+parser.add_argument("file_suffix", help="an identifier to append to the output file names")
 
 if __name__ == '__main__':
-	active_bars = [bar.strip() for bar in open(sys.argv[1], 'r')]
-	filename_append = sys.argv[2]
+	args = parser.parse_args()
+
+	active_bars = [bar.strip() for bar in open(args.bar_file, 'r')]
+	filename_append = args.file_suffix
 
 	bar_subset = BarSubset(active_bars, filename_append)
 

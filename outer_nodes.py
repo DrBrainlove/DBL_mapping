@@ -1,4 +1,4 @@
-import sys, random
+import sys, random, argparse
 from collections import defaultdict
 
 old_new = {}
@@ -49,9 +49,15 @@ def parse_outer(f, old_new):
         
     return outer_bars
 
+parser = argparse.ArgumentParser()
+parser.add_argument("old_new", help="filename of the master spreadsheet with old and new node names")
+parser.add_argument("brian_labels", help="filename of the csv of labels we got from brian")
+
 if __name__ == '__main__':
-    old_new_file = open(sys.argv[1], 'r')
-    outer_file = open(sys.argv[2], 'r')
+    args = parser.parse_args()
+
+    old_new_file = open(args.old_new, 'r')
+    outer_file = open(args.brian_label, 'r')
 
     old_new = parse_old_new(old_new_file)
     old_new_file.close()
