@@ -138,7 +138,7 @@ def xyz_dist(point1,point2):
 
 
 class BarSubset(object):
-	def __init__(self,active_bars=None,filename_append=None):
+	def __init__(self,active_bars=None,filename_append=None,active_modules=None):
 		use_these = []
 		for active_bar in active_bars:
 			sortedbar = '-'.join(sorted(list(active_bar.split('-'))))
@@ -146,6 +146,10 @@ class BarSubset(object):
 		self.active_bars = use_these
 		self.filename_append=filename_append
 		self.active_nodes = []
+		if active_modules:
+			self.active_modules=active_modules
+		else:
+			self.active_modules=range(1,15) #this goes 1-14
 		#automatically infers active nodes from active bars
 		for bar in self.active_bars:
 			nodes_in_bar = bar.split('-')
@@ -171,6 +175,17 @@ partialBrainSubset = BarSubset(active_bars,filename_append)
 bar_subsets.append(partialBrainSubset)
 
 
+
+#PUT THE EXPERIMENTAL BAR SUBSET HERE
+filename_append = "Module_14"
+active_bars = ["LIE-OLD", "LIE-TAU", "OLD-TAU", "GIG-LIE", "ERA-IRE", "ERA-RIB", "FOG-RIB", "FOG-TAU", "GIG-IRE", "ERA-GIG", "ERA-LAW", "EVE-FOG", "EVE-GIG", "EVE-IRE", "EVE-LAW", "EVE-LIE", "EVE-OLD", "FOG-OLD", "GIG-LAW", "IRE-LAW", "IRE-RIB", "LAW-LIE", "LAW-OLD", "LAW-RIB", "LAW-TAU"]
+partialBrainSubset = BarSubset(active_bars,filename_append,[14])
+bar_subsets.append(partialBrainSubset)
+
+
+
+
+
 #PUT THE EXPERIMENTAL BAR SUBSET HERE
 filename_append = "Algorithmic_Brain"
 active_bars = make_bars_subset(400)
@@ -181,6 +196,7 @@ for bar_subset in bar_subsets:
 	#load things from the object
 	active_nodes = bar_subset.active_nodes
 	active_bars = bar_subset.active_bars
+	active_modules = bar_subset.active_modules
 	if filename_append:
 		filename_append = '_'+bar_subset.filename_append
 	else:
@@ -227,22 +243,23 @@ for bar_subset in bar_subsets:
 		rdr.next()
 		for line in rdr:
 			modul=line[0]
-			node=line[1]
-			x=float(line[2])
-			y=float(line[3])
-			z=float(line[4])
-			add_node = True
-			if active_nodes:
-				if node in active_nodes:
-					add_node = True
-				else:
-					add_node = False
-			if add_node:
-				if modul not in module_dict:
-					module_dict[modul]=set()
-				module_dict[modul].add(node)
-				node_xyz[node]=[x,y,z] #just for cross module bars
-				node_module_xyz[node+"-"+str(modul)]=[x,y,z]
+			if int(modul) in active_modules:
+				node=line[1]
+				x=float(line[2])
+				y=float(line[3])
+				z=float(line[4])
+				add_node = True
+				if active_nodes:
+					if node in active_nodes:
+						add_node = True
+					else:
+						add_node = False
+				if add_node:
+					if modul not in module_dict:
+						module_dict[modul]=set()
+					module_dict[modul].add(node)
+					node_xyz[node]=[x,y,z] #just for cross module bars
+					node_module_xyz[node+"-"+str(modul)]=[x,y,z]
 
 
 	total_distance_with_duplicates=0.0
