@@ -1,4 +1,4 @@
-import os,csv, math, collections, random
+import os,csv, math, collections, random, time
 
 
 
@@ -137,6 +137,18 @@ def make_bars_subset(bars_target=400):
 
 
 
+def get_bar_len_led_info(bar):
+    barinfo=collections.defaultdict()
+    with open("DBL2_edgelengths_with_led_counts.csv","rb") as f:
+        rdr=csv.reader(f)
+        for row in rdr:
+            barnamset=set(row[0].split('-'))
+            if barnamset==bar:
+                bar_len=float(row[1])
+                num_leds=int(row[3])
+                return bar_len,num_leds
+    return False
+
 
 def xyz_dist(point1,point2):
     return math.sqrt(math.pow((point2[0]-point1[0]),2) +  math.pow((point2[1]-point1[1]),2) + math.pow((point2[2]-point1[2]),2))
@@ -183,7 +195,7 @@ bar_subsets.append(partialBrainSubset)
 
 #PUT THE EXPERIMENTAL BAR SUBSET HERE
 filename_append = "Module_14"
-active_bars = ["LIE-OLD", "LIE-TAU", "OLD-TAU", "GIG-LIE", "ERA-IRE", "ERA-RIB", "FOG-RIB", "FOG-TAU", "GIG-IRE", "ERA-GIG", "ERA-LAW", "EVE-FOG", "EVE-GIG", "EVE-IRE", "EVE-LAW", "EVE-LIE", "EVE-OLD", "FOG-OLD", "GIG-LAW", "IRE-LAW", "IRE-RIB", "LAW-LIE", "LAW-OLD", "LAW-RIB", "LAW-TAU"]
+active_bars = ["LIE-OLD", "LIE-TAU", "OLD-TAU", "GIG-LIE", "ERA-IRE", "ERA-RIB", "FOG-RIB", "FOG-TAU", "GIG-IRE", "ERA-GIG", "ERA-LAW", "EVE-FOG", "EVE-GIG", "EVE-IRE", "EVE-LAW", "EVE-LIE", "EVE-OLD", "FOG-OLD", "GIG-LAW", "IRE-LAW", "IRE-RIB", "LAW-LIE", "LAW-OLD", "LAW-RIB", "LAW-TAU","FOG-LAW"]
 print len(active_bars)
 partialBrainSubset = BarSubset(active_bars,filename_append,[14])
 bar_subsets.append(partialBrainSubset)
@@ -364,11 +376,13 @@ for bar_subset in bar_subsets:
                     if bar_w_mod_num not in bars_with_module_nums:
                         bars_with_module_nums.append(bar_w_mod_num)
                     node_1_name=barnods[0]
-                    node_2_name=barnods[1]              
-
+                    node_2_name=barnods[1]       
                     #figure out if the alphabetically ordered nodes are increasing or decreasing in the x-direction for 
                     #iteratively adding LEDs down it
                     forward_x = nod1[0]<nod2[0]
+
+                    bar_len_led_info=get_bar_len_led_info(bar)
+
                     barlen=xyz_dist(nod1,nod2)
                     dx=(nod2[0]-nod1[0])/barlen*led_spacing
                     dy=(nod2[1]-nod1[1])/barlen*led_spacing
@@ -377,13 +391,13 @@ for bar_subset in bar_subsets:
                     if forward_x:
                         while pixel[0]<nod2[0]:
                             pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
-                            pixel_counter+=1
                             wrtr.writerow([pixel_counter,modul,modul,node_1_name,node_2_name]+pixel)
+                            pixel_counter+=1
                     else:
                         while pixel[0]>nod2[0]:
                             pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
-                            pixel_counter+=1
                             wrtr.writerow([pixel_counter,modul,modul,node_1_name,node_2_name]+pixel)
+                            pixel_counter+=1
 
         #same monkey, different banana
         for bar in cross_module_bars:
@@ -415,13 +429,49 @@ for bar_subset in bar_subsets:
                 if forward_x:
                     while pixel[0]<nod2[0]:
                         pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
-                        pixel_counter+=1
                         wrtr.writerow([pixel_counter,crossbar_modul,other_modul,node_1_name,node_2_name]+pixel)
+                        pixel_counter+=1
                 else:
                     while pixel[0]>nod2[0]:
                         pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
-                        pixel_counter+=1
                         wrtr.writerow([pixel_counter,crossbar_modul,other_modul,node_1_name,node_2_name]+pixel)
+                        pixel_counter+=1
+
+    if bar_subset.filename_append=="Module_14": #TODO: Make this work for every module
+        pixelmappingfilename = modelinfo_output_directory+"/%s/pixel_mapping.csv"%(filename_append)
+        with open(pixelmappingfilename,"wb") as f:
+            wrtr=csv.writer(f)
+            wrtr.writerow(["Pixel_i","Module1","Module2","Node1","Node2","X","Y","Z"])
+            pixel_counter=0
+            with open("Module_Bar_Orders.csv","rb") as f2:
+                rdr=csv.reader(f2)
+                rdr.next()
+                for row in rdr:
+                    modul=row[0]
+                    bar_as_list=row[1].split('-')
+                    bar_as_list_alphabetical=sorted(bar_as_list)
+                    #print bar_as_list
+                    node1=bar_as_list[0]
+                    node2=bar_as_list[1]
+                    node1_alphabetic=bar_as_list_alphabetical[0]
+                    node2_alphabetic=bar_as_list_alphabetical[1]
+                    node1_xyz=node_module_xyz[node1+"-"+str(modul)]
+                    node2_xyz=node_module_xyz[node2+"-"+str(modul)]
+                    barset=set(bar_as_list)
+                    bar_len,num_pixels=get_bar_len_led_info(barset)
+                    barlen_for_calc=xyz_dist(node1_xyz,node2_xyz)
+                    #3.0 inch space at the end of the bar where the bolt hole is minus 1.5 inches because of where the hole is. this is rough. might need to adjust.
+                    dx_bar_end_space=(node2_xyz[0]-node1_xyz[0])/barlen_for_calc*1.5 
+                    dy_bar_end_space=(node2_xyz[1]-node1_xyz[1])/barlen_for_calc*1.5 
+                    dz_bar_end_space=(node2_xyz[2]-node1_xyz[2])/barlen_for_calc*1.5 
+                    dx=(node2_xyz[0]-node1_xyz[0])/barlen_for_calc*led_spacing
+                    dy=(node2_xyz[1]-node1_xyz[1])/barlen_for_calc*led_spacing
+                    dz=(node2_xyz[2]-node1_xyz[2])/barlen_for_calc*led_spacing
+                    pixel=[node1_xyz[0]+dx_bar_end_space,node1_xyz[1]+dy_bar_end_space,node1_xyz[2]+dz_bar_end_space]
+                    for pixl in range(0,num_pixels):
+                        wrtr.writerow([pixel_counter,modul,modul,node1_alphabetic,node2_alphabetic]+pixel)
+                        pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
+                        pixel_counter+=1
 
 
 

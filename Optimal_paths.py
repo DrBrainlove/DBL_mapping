@@ -19,12 +19,21 @@ def nodes_from_bars(barlist):
 
 
 #Given a current position node and a set of bars that haven't been used yet, return a list of possible next steps
-def get_next_bar_options(node,bars_remaining):
+def get_next_bar_options(node,prevnode,bars_remaining):
 	result=[]
+	double_back=False
+	currentnode=node
 	for bar in bars_remaining:
 		if node in bar:
 			result.append(bar)
-	return result
+			currentnode=node
+	if not result:
+		double_back=True
+		for bar in bars_remaining:
+			if prevnode in bar:
+				result.append(bar)
+				currentnode=prevnode
+	return double_back,result,currentnode
 
 #You have a bar. You know one node. What's the other node?
 #Simple as fuck but annoying to type out
@@ -39,7 +48,7 @@ def get_other_node(bar,node):
 
 
 
-#Set the bars here
+#Set the bars here (currently module ar)
 bars=[set(["LIE","OLD"]), set(["LIE","TAU"]), set(["OLD","TAU"]), set(["GIG","LIE"]), set(["ERA","IRE"]), set(["ERA","RIB"]), set(["FOG","RIB"]), set(["FOG","TAU"]), set(["GIG","IRE"]), set(["ERA","GIG"]), set(["ERA","LAW"]), set(["EVE","GIG"]), set(["EVE","IRE"]), set(["EVE","LAW"]), set(["EVE","LIE"]), set(["EVE","OLD"]), set(["FOG","OLD"]), set(["GIG","LAW"]), set(["IRE","LAW"]), set(["IRE","RIB"]), set(["LAW","LIE"]), set(["LAW","OLD"]), set(["LAW","RIB"]), set(["LAW","FOG"]), set(["LAW","TAU"])]
 
 #Yay informations
@@ -55,18 +64,24 @@ paths[999]=[]
 #iterate through starting points
 for startnode in nodes:
 	print startnode,datetime.datetime.now() #administer a small amount of dopamine as a treat for good user behavior (e.g. patience)
-	for x in range(0,30000):
+	for x in range(0,1000):
 		num_strips=1
+		num_loopbacks=0
 		#iterate through first moves
 		bars_remaining=copy.deepcopy(bars)
 		this_path=[]
 		node=startnode
+		prevnode="###"
 		while len(bars_remaining)>0:
-			bar_options=get_next_bar_options(node,bars_remaining)
+			doubled_back,bar_options,node=get_next_bar_options(node,prevnode,bars_remaining)
+			if doubled_back:
+				num_loopbacks+=1
+				this_path.append("LOOPBACK")
 			if bar_options:
 				choosethisbar=random.choice(bar_options)
 				bars_remaining.remove(choosethisbar)
 				this_path.append([node,get_other_node(choosethisbar,node)])
+				prevnode=node
 				node=get_other_node(choosethisbar,node)
 			else:
 				num_strips+=1
@@ -74,22 +89,32 @@ for startnode in nodes:
 				choosethisbar=random.choice(bars_remaining)
 				bars_remaining.remove(choosethisbar)
 				node=random.sample(choosethisbar,1)[0]
+				prevnode=get_other_node(choosethisbar,node)
 				this_path.append([get_other_node(choosethisbar,node),node])
+
 			if not bars_remaining:
 				current_best=min(paths.keys())
 				if num_strips <= current_best:
 					if num_strips not in paths:
-						paths[num_strips]=[]
-					if this_path not in paths[num_strips]:
-						paths[num_strips].append(this_path)
+						paths[num_strips]=collections.defaultdict()
+						minloopbacks=9999
+					else:
+						minloopbacks=min(paths[num_strips].keys())
+					if num_loopbacks <= minloopbacks:
+						if num_loopbacks not in paths[num_strips]:
+							paths[num_strips][num_loopbacks]=[]
+						if this_path not in paths[num_strips][num_loopbacks]:
+							paths[num_strips][num_loopbacks].append(this_path)
 
 #How few strips can we use?
 minkey= min(paths.keys())
 lenpaths=len(paths[minkey])
+minloopbacks=min(paths[minkey].keys())
+lenminpathsminloopbacks=len(paths[minkey][minloopbacks])
 
 #optimize for lowest number of starting points (aka if there are two strips, is there a solution where they start on the same node)
 closest_start_paths=collections.defaultdict()
-for path in paths[minkey]:
+for path in paths[minkey][minloopbacks]:
 	set_of_first_nodes=set()
 	set_of_first_nodes.add(path[0][0])
 	prevbar=path[0][0]
@@ -109,7 +134,7 @@ numminstartnodeoptions=len(closest_start_paths[minstartnodes])
 #optimize for the most even number of strips (if we have to use three strips, let's not have one ten bars long and one two bars long)
 #TODO: calculate with pixel lengths.
 most_even_paths=collections.defaultdict()
-for path in paths[minkey]:
+for path in paths[minkey][minloopbacks]:
 	path_bar_lengths=[]
 	bars_in_stretch=0
 	for bar in path:
@@ -132,13 +157,18 @@ numevenestoptions=len(most_even_paths[mostevenpathvariance])
 
 
 print "Minimum number of strips: ",minkey
-print "Options with that many strips: ", lenpaths
+print "Given ^^^, minimum number of loopbacks: ",minloopbacks
+print "Options with that many strips and loopbacks: ", lenminpathsminloopbacks
 print "Given that number of strips, minimum number of start nodes: ",minstartnodes
 print "Options with minimum number of start nodes: ",numminstartnodeoptions
 print "Sample option: ",closest_start_paths[minstartnodes][0]
 print "Or if even strip length is important, lowest variance in lengths (by bars, todo: by pixels): ",mostevenpathvariance
 print "Options with above glimmering awesome variance number: ",numevenestoptions
 print "One of those best possible options: ",most_even_paths[mostevenpathvariance][0]
+
+for bar in most_even_paths[mostevenpathvariance][0]:
+	if bar != "BREAK" and bar !="LOOPBACK":
+		print bar[0]+"-"+bar[1]
 
 
 
