@@ -441,7 +441,7 @@ for bar_subset in bar_subsets:
         pixelmappingfilename = modelinfo_output_directory+"/%s/pixel_mapping.csv"%(filename_append)
         with open(pixelmappingfilename,"wb") as f:
             wrtr=csv.writer(f)
-            wrtr.writerow(["Pixel_i","Module1","Module2","Node1","Node2","X","Y","Z"])
+            wrtr.writerow(["Pixel_i","Module1","Module2","Node1","Node2","X","Y","Z","Strip"])
             pixel_counter=0
             with open("Module_Bar_Orders.csv","rb") as f2:
                 rdr=csv.reader(f2)
@@ -449,6 +449,7 @@ for bar_subset in bar_subsets:
                 for row in rdr:
                     modul=row[0]
                     bar_as_list=row[1].split('-')
+                    strip=row[2]
                     bar_as_list_alphabetical=sorted(bar_as_list)
                     #print bar_as_list
                     node1=bar_as_list[0]
@@ -469,7 +470,7 @@ for bar_subset in bar_subsets:
                     dz=(node2_xyz[2]-node1_xyz[2])/barlen_for_calc*led_spacing
                     pixel=[node1_xyz[0]+dx_bar_end_space,node1_xyz[1]+dy_bar_end_space,node1_xyz[2]+dz_bar_end_space]
                     for pixl in range(0,num_pixels):
-                        wrtr.writerow([pixel_counter,modul,modul,node1_alphabetic,node2_alphabetic]+pixel)
+                        wrtr.writerow([pixel_counter,modul,modul,node1_alphabetic,node2_alphabetic]+pixel+[strip])
                         pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
                         pixel_counter+=1
 
