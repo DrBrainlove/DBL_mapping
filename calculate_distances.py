@@ -201,6 +201,15 @@ partialBrainSubset = BarSubset(active_bars,filename_append,[14])
 bar_subsets.append(partialBrainSubset)
 
 
+"""
+#PUT THE EXPERIMENTAL BAR SUBSET HERE
+filename_append = "Shitty_Pixelpusher_Test"
+active_bars = ["ERA-GIG","EVE-LAW","GIG-IRE"]
+print len(active_bars)
+partialBrainSubset = BarSubset(active_bars,filename_append,[14])
+bar_subsets.append(partialBrainSubset)
+"""
+
 
 
 
@@ -437,7 +446,7 @@ for bar_subset in bar_subsets:
                         wrtr.writerow([pixel_counter,crossbar_modul,other_modul,node_1_name,node_2_name]+pixel)
                         pixel_counter+=1
 
-    if bar_subset.filename_append=="Module_14": #TODO: Make this work for every module
+    if bar_subset.filename_append=="Module_14" or bar_subset.filename_append=="Shitty_Pixelpusher_Test": #TODO: Make this work for every module
         pixelmappingfilename = modelinfo_output_directory+"/%s/pixel_mapping.csv"%(filename_append)
         with open(pixelmappingfilename,"wb") as f:
             wrtr=csv.writer(f)
