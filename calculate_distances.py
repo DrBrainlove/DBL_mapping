@@ -11,6 +11,36 @@ ground_nodes = ["WAX","AIM","LID","BOX","HUG","FLU","SIR","ONO","TAT","COP","NEW
 
 modelinfo_output_directory="mapping_datasets"
 
+
+def inner_outer_errthing():
+    in_out_mid_bars=collections.defaultdict()
+    in_out_nodes=collections.defaultdict()
+    filename_designations=[("inner_bars.csv","inner"),("outer_bars.csv","outer"),("in_to_out_bars.csv","in_to_out")]
+
+    #handle bars
+    for fildes in filename_designations:
+        fil=fildes[0]
+        des=fildes[1]
+        with open(fil) as f:
+            rdr=csv.reader(f)
+            for row in rdr:
+                nodes=row[0].split('-')
+                bar='-'.join(sorted(nodes))
+                in_out_mid_bars[bar]=des
+
+    #handle nodes
+    for bar in in_out_mid_bars:
+        if in_out_mid_bars[bar]=="inner":
+            for node in bar.split('-'):
+                in_out_nodes[node]="inner"
+        if in_out_mid_bars[bar]=="outer":
+            for node in bar.split('-'):
+                in_out_nodes[node]="outer"
+
+    return in_out_mid_bars,in_out_nodes
+
+
+
 def get_bars():
     bars=[]
     node_connections = collections.defaultdict()
@@ -511,6 +541,7 @@ if __name__=="__main__":
 
 
     for bar_subset in bar_subsets:
+        in_out_mid_bars,in_out_nodes=inner_outer_errthing()
         #load things from the object
         active_nodes = bar_subset.active_nodes
         active_bars = bar_subset.active_bars
@@ -891,9 +922,10 @@ if __name__=="__main__":
                 ground="1"
             else:
                 ground="0"
+            inner_outer=in_out_nodes[nodenam]
 
-            nodes_dict[nodenam]=[nodenam]+nod_xyz+[subnods,nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules,ground]
-            nodes_modules_dict[nod]=[nod,nodenam,modul]+xyz+[nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules,ground]
+            nodes_dict[nodenam]=[nodenam]+nod_xyz+[subnods,nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules,ground,inner_outer]
+            nodes_modules_dict[nod]=[nod,nodenam,modul]+xyz+[nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules,ground,inner_outer]
 
 
 
@@ -970,16 +1002,43 @@ if __name__=="__main__":
                     for pnodbar in nod_pbars:
                         if pnodbar not in physbars and pnodbar not in adjacent_phys_bars and 'FEW' not in pnodbar:
                             adjacent_phys_bars.append(pnodbar)
-                bars_dict[barstr]=[barstr,moduls,min_x,min_y,min_z,max_x,max_y,max_z,nodenams,physbars,adjacent_nods,physnods,adjacent_phys_bars,adjacent_bars,adjacent_phys_nods,ground]
+                inner_outer_mid=in_out_mid_bars[testnam]
+                bars_dict[barstr]=[barstr,moduls,min_x,min_y,min_z,max_x,max_y,max_z,nodenams,physbars,adjacent_nods,physnods,adjacent_phys_bars,adjacent_bars,adjacent_phys_nods,ground,inner_outer_mid]
 
 
         modelnodeinfofilename = modelinfo_output_directory+"/%s/Model_Node_Info.csv"%(filename_append)
         structuralnodeinfofilename = modelinfo_output_directory+"/%s/Structural_Node_Info.csv"%(filename_append)
         modelbarinfofilename = modelinfo_output_directory+"/%s/Model_Bar_Info.csv"%(filename_append)
 
+
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
+
         with open(modelnodeinfofilename,"wb") as f:
             wrtr=csv.writer(f)
-            wrtr.writerow(["Node","X","Y","Z","Subnodes","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground"])
+            wrtr.writerow(["Node","X","Y","Z","Subnodes","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground","Inner_Outer"])
             for nod in nodes_dict:
                 wrtr.writerow(nodes_dict[nod])
 
@@ -987,14 +1046,14 @@ if __name__=="__main__":
 
         with open(structuralnodeinfofilename,"wb") as f:
             wrtr=csv.writer(f)
-            wrtr.writerow(["Node_with_Module","Node","Module","X","Y","Z","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground"])
+            wrtr.writerow(["Node_with_Module","Node","Module","X","Y","Z","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground","Inner_Outer"])
             for nod in nodes_modules_dict:
                 wrtr.writerow(nodes_modules_dict[nod])
 
 
         with open(modelbarinfofilename,"wb") as f:
             wrtr=csv.writer(f)
-            wrtr.writerow(["Bar_name","Modules","Min_X","Min_Y","Min_Z","Max_X","Max_Y","Max_Z","Nodes","Physical_Bars","Physical_Nodes","Adjacent_Nodes","Adjacent_Physical_Bars","Adjacent_Bars","Adjacent_Physical_Nodes","Ground"])
+            wrtr.writerow(["Bar_name","Modules","Min_X","Min_Y","Min_Z","Max_X","Max_Y","Max_Z","Nodes","Physical_Bars","Physical_Nodes","Adjacent_Nodes","Adjacent_Physical_Bars","Adjacent_Bars","Adjacent_Physical_Nodes","Ground","Inner_Outer"])
             for bar in bars_dict:
                 wrtr.writerow(bars_dict[bar])
 
