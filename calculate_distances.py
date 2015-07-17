@@ -726,6 +726,8 @@ if __name__=="__main__":
             for row in rdr:
                 modul=row[0]
                 bar_as_list=row[1].split('-')
+                bar_as_bar_name='-'.join(sorted(bar_as_list))
+                inner_outer_mid=in_out_mid_bars[bar_as_bar_name]
                 strip=row[2]
                 bar_as_list_alphabetical=sorted(bar_as_list)
                 barset=set(bar_as_list)
@@ -748,7 +750,7 @@ if __name__=="__main__":
                     writ_bars.add(physical_bar_name)
                     pixel=[node1_xyz[0]+dx_bar_end_space,node1_xyz[1]+dy_bar_end_space,node1_xyz[2]+dz_bar_end_space]
                     for pixl in range(0,num_pixels):
-                        add_row=[pixel_counter,modul,modul,node1_alphabetic,node2_alphabetic]+pixel+[strip]
+                        add_row=[pixel_counter,modul,modul,inner_outer_mid,node1_alphabetic,node2_alphabetic]+pixel+[strip]
                         strip_pixel=str(strip).zfill(5)+"-"+str(pixel_counter).zfill(8)
                         write_to_pixel_mapping_file[strip_pixel]=add_row
                         pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
@@ -773,6 +775,8 @@ if __name__=="__main__":
                     node1_xyz=node_module_xyz[barnods[0]+"-"+str(modul)]
                     node2_xyz=node_module_xyz[barnods[1]+"-"+str(modul)]
                     bar_w_mod_num = barnods[0]+"-"+barnods[1]+"-"+str(modul)
+                    bar_sans_mod_num = barnods[0]+"-"+barnods[1]
+                    inner_outer_mid=in_out_mid_bars[bar_sans_mod_num]
                     if bar_w_mod_num not in bars_with_module_nums:
                         bars_with_module_nums.append(bar_w_mod_num)
                     if bar_w_mod_num not in writ_bars:
@@ -799,7 +803,7 @@ if __name__=="__main__":
                         writ_bars.add(bar_w_mod_num)
                         pixel=[node1_xyz[0]+dx_bar_end_space,node1_xyz[1]+dy_bar_end_space,node1_xyz[2]+dz_bar_end_space]
                         for pixl in range(0,num_pixels):
-                            add_row=[pixel_counter,modul,modul,node_1_name,node_2_name]+pixel+[strip]
+                            add_row=[pixel_counter,modul,modul,inner_outer_mid,node_1_name,node_2_name]+pixel+[strip]
                             strip_pixel=str(strip).zfill(5)+"-"+str(pixel_counter).zfill(8)
                             write_to_pixel_mapping_file[strip_pixel]=add_row
                             pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
@@ -819,6 +823,8 @@ if __name__=="__main__":
             if not(node_1_name and node_2_name):
                 print "Bar:",bar,"...dafuq?"
             else:
+                bar_sans_mod_num = barnods[0]+"-"+barnods[1]
+                inner_outer_mid=in_out_mid_bars[bar_sans_mod_num]
                 node1_xyz=node_module_xyz[node_1_name]
                 node2_xyz=node_module_xyz[node_2_name]
                 crossbar_w_mod_num = barnods[0]+"-"+barnods[1]+"-"+str(crossbar_modul)+"-"+str(other_modul)
@@ -845,7 +851,7 @@ if __name__=="__main__":
                     dz=(node2_xyz[2]-node1_xyz[2])/barlen_for_calc*led_spacing
                     pixel=[node1_xyz[0]+dx_bar_end_space,node1_xyz[1]+dy_bar_end_space,node1_xyz[2]+dz_bar_end_space]
                     for pixl in range(0,num_pixels):
-                        add_row=[pixel_counter,crossbar_modul,other_modul,barnods[0],barnods[1]]+pixel+[strip]
+                        add_row=[pixel_counter,crossbar_modul,other_modul,inner_outer_mid,barnods[0],barnods[1]]+pixel+[strip]
                         strip_pixel=str(strip).zfill(5)+"-"+str(pixel_counter).zfill(8)
                         write_to_pixel_mapping_file[strip_pixel]=add_row
                         pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
@@ -855,7 +861,7 @@ if __name__=="__main__":
 
         with open(pixelmappingfilename,"wb") as f:
             wrtr=csv.writer(f)
-            wrtr.writerow(["Pixel_i","Module1","Module2","Node1","Node2","X","Y","Z","Strip"])
+            wrtr.writerow(["Pixel_i","Module1","Module2","Inner_Outer","Node1","Node2","X","Y","Z","Strip"])
             for strip_pixl_cnt in sorted(write_to_pixel_mapping_file.keys()):
                 wrtr.writerow(write_to_pixel_mapping_file[strip_pixl_cnt])
 
