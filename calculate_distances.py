@@ -1,4 +1,4 @@
-import os,csv, math, collections, random, time,datetime
+import os,csv, math, collections, random, time,datetime, traceback
 import pickle
 
 
@@ -11,19 +11,15 @@ ground_nodes = ["WAX","AIM","LID","BOX","HUG","FLU","SIR","ONO","TAT","COP","NEW
 
 modelinfo_output_directory="mapping_datasets"
 
-
-
-def get_ground_bars():
-    outer_nodes=get_outer_nodes()
-    #copied and pasted from below. not optimized at all and not worth trimming. this is just to load the whole bar map to whittle down from
+def get_bars():
     bars=[]
     node_connections = collections.defaultdict()
-    with open("node_info_DBL1.csv","rb") as f: #old coordinates but still has right bar mapping
-       rdr=csv.reader(f)
-       rdr.next()
-       for line in rdr:
-          startnod=line[0]
-          for x in [4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34]:
+    with open("DBL2_node_info.csv","rb") as f:
+        rdr=csv.reader(f)
+        rdr.next()
+        for line in rdr:
+          startnod=line[1]
+          for x in [5,7,9,11,13,15,17,20,21,23,25,27,29,31,33,35]:
              if len(line)>=x+1:
                 endnod=line[x]
                 nodes_set=set([startnod,endnod])
@@ -36,6 +32,31 @@ def get_ground_bars():
                     node_connections[endnod].append(startnod)
                     if nodes_set not in bars: #avoid duplicates
                         bars.append(nodes_set)
+    with open("DBL2_crossbars.csv","rb") as f:
+        rdr=csv.reader(f)
+        rdr.next()
+        for line in rdr:
+            startnod=line[0]
+            endnod=line[1]
+            nodes_set=set([startnod,endnod])
+            if "FEW" not in nodes_set:
+                if startnod not in node_connections:
+                    node_connections[startnod]=[]
+                node_connections[startnod].append(endnod)
+                if endnod not in node_connections:
+                    node_connections[endnod]=[]
+                node_connections[endnod].append(startnod)
+                if nodes_set not in bars: #avoid duplicates
+                    bars.append(nodes_set)
+    return bars
+    
+
+
+
+def get_ground_bars():
+    outer_nodes=get_outer_nodes()
+    #copied and pasted from below. not optimized at all and not worth trimming. this is just to load the whole bar map to whittle down from
+    bars=get_bars()
     ground_bars=[]
     ground_bars_plus=[]
     nodes_counts=collections.defaultdict()
@@ -68,26 +89,7 @@ def get_ground_bars():
 def make_bars_subset(bars_target=400):
 
     #copied and pasted from below. not optimized at all and not worth trimming. this is just to load the whole bar map to whittle down from
-    bars=[]
-    node_connections = collections.defaultdict()
-    with open("node_info_DBL1.csv","rb") as f: #old coordinates but still has right bar mapping
-       rdr=csv.reader(f)
-       rdr.next()
-       for line in rdr:
-          startnod=line[0]
-          for x in [4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34]:
-             if len(line)>=x+1:
-                endnod=line[x]
-                nodes_set=set([startnod,endnod])
-                if "FEW" not in nodes_set:
-                    if startnod not in node_connections:
-                        node_connections[startnod]=[]
-                    node_connections[startnod].append(endnod)
-                    if endnod not in node_connections:
-                        node_connections[endnod]=[]
-                    node_connections[endnod].append(startnod)
-                    if nodes_set not in bars: #avoid duplicates
-                        bars.append(nodes_set)
+    bars=get_bars()
 
 
     bars_subset_test = bars
@@ -514,15 +516,17 @@ if __name__=="__main__":
         active_bars = bar_subset.active_bars
         active_modules = bar_subset.active_modules
         filename_append = bar_subset.filename_append
+
+        cross_module_bars=[]
         print "FILE:",filename_append
         bars=[]
         node_connections = collections.defaultdict()
-        with open("node_info_DBL1.csv","rb") as f: #old coordinates but still has right bar mapping
+        with open("DBL2_node_info.csv","rb") as f: #old coordinates but still has right bar mapping
            rdr=csv.reader(f)
            rdr.next()
            for line in rdr:
-              startnod=line[0]
-              for x in [4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34]:
+              startnod=line[1]
+              for x in [5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]:
                  if len(line)>=x+1:
                     endnod=line[x]
                     nodes_set=set([startnod,endnod])
@@ -544,6 +548,32 @@ if __name__=="__main__":
                         node_connections[endnod].append(startnod)
                         if nodes_set not in bars: #avoid duplicates
                             bars.append(nodes_set)
+
+        with open("DBL2_crossbars.csv","rb") as f:
+            rdr=csv.reader(f)
+            rdr.next()
+            for line in rdr:
+                startnod=line[0]
+                endnod=line[1]
+                nodes_set=set([startnod,endnod])
+                if not active_bars:
+                    add_thisn=True
+                else:
+                    add_thisn=False
+                    bar_string = '-'.join(sorted(list(nodes_set)))
+                    if bar_string in active_bars:
+                        add_thisn = True
+                if add_thisn:
+                    if startnod not in node_connections:
+                        node_connections[startnod]=[]
+                    node_connections[startnod].append(endnod)
+                    if endnod not in node_connections:
+                        node_connections[endnod]=[]
+                    node_connections[endnod].append(startnod)
+                    if nodes_set not in bars: #avoid duplicates
+                        bars.append(nodes_set)
+                    cross_module_bars.append(nodes_set)
+
 
 
         node_xyz=collections.defaultdict()
@@ -584,7 +614,6 @@ if __name__=="__main__":
         module_bars=[]
         module_bars_sans_doubles=[]
         double_bars=[]
-        cross_module_bars=[]
         bar_lengths=collections.defaultdict()
 
 
@@ -617,9 +646,9 @@ if __name__=="__main__":
                         double_bars_length+=barlength
                         
 
-        for bar in bars:
-            if bar not in module_bars:
-                cross_module_bars.append(bar)
+     #   for bar in bars:
+     #       if bar not in module_bars:
+     #           cross_module_bars.append(bar)
 
         #print len(cross_module_bars)
 
@@ -632,6 +661,7 @@ if __name__=="__main__":
                 bar_lengths[str(barnods[0])+"-"+str(barnods[1])]=barlength
                 crossbars+=barlength
             except:
+                print traceback.print_exc()
                 #print "eh",bar
                 to_bar_or_not_to_bar.append(bar)
 
@@ -708,8 +738,9 @@ if __name__=="__main__":
                     #for consistency always have bar node pairs in alphabetical order
                     #Earlier, this was by x-position but was changed because alphabetical is going to make things easier down the line
                     barnods=sorted(list(bar))
-                    nod1=node_module_xyz[barnods[0]+"-"+str(modul)]
-                    nod2=node_module_xyz[barnods[1]+"-"+str(modul)]
+                    barset=set(barnods)
+                    node1_xyz=node_module_xyz[barnods[0]+"-"+str(modul)]
+                    node2_xyz=node_module_xyz[barnods[1]+"-"+str(modul)]
                     bar_w_mod_num = barnods[0]+"-"+barnods[1]+"-"+str(modul)
                     if bar_w_mod_num not in bars_with_module_nums:
                         bars_with_module_nums.append(bar_w_mod_num)
@@ -718,37 +749,35 @@ if __name__=="__main__":
                         node_2_name=barnods[1]       
                         #figure out if the alphabetically ordered nodes are increasing or decreasing in the x-direction for 
                         #iteratively adding LEDs down it
-                        forward_x = nod1[0]<nod2[0]
 
                         bar_len_led_info=get_bar_len_led_info(bar)
                         strip=9999 #set strip number to 9999 if not specified
                         bar_mod_key=node_1_name+"-"+node_2_name+"-"+str(modul)
                         if bar_mod_key in barmodulestripnumbers:
                             strip=barmodulestripnumbers[bar_mod_key]
-                        barlen=xyz_dist(nod1,nod2)
-                        dx=(nod2[0]-nod1[0])/barlen*led_spacing
-                        dy=(nod2[1]-nod1[1])/barlen*led_spacing
-                        dz=(nod2[2]-nod1[2])/barlen*led_spacing
-                        pixel=nod1      
-                        if forward_x:
-                            while pixel[0]<nod2[0]:
-                                pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
-                                add_row=[pixel_counter,modul,modul,node_1_name,node_2_name]+pixel+[strip]
-                                strip_pixel=str(strip).zfill(5)+"-"+str(pixel_counter).zfill(8)
-                                write_to_pixel_mapping_file[strip_pixel]=add_row
-                                pixel_counter+=1
-                        else:
-                            while pixel[0]>nod2[0]:
-                                pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
-                                add_row=[pixel_counter,modul,modul,node_1_name,node_2_name]+pixel+[strip]
-                                strip_pixel=str(strip).zfill(5)+"-"+str(pixel_counter).zfill(8)
-                                write_to_pixel_mapping_file[strip_pixel]=add_row
-                                pixel_counter+=1
+
+                        bar_len,num_pixels=get_bar_len_led_info(barset)
+                        barlen_for_calc=xyz_dist(node1_xyz,node2_xyz)
+                        #3.0 inch space at the end of the bar where the bolt hole is minus 1.5 inches because of where the hole is. this is rough. might need to adjust.
+                        dx_bar_end_space=(node2_xyz[0]-node1_xyz[0])/barlen_for_calc*1.5 
+                        dy_bar_end_space=(node2_xyz[1]-node1_xyz[1])/barlen_for_calc*1.5 
+                        dz_bar_end_space=(node2_xyz[2]-node1_xyz[2])/barlen_for_calc*1.5 
+                        dx=(node2_xyz[0]-node1_xyz[0])/barlen_for_calc*led_spacing
+                        dy=(node2_xyz[1]-node1_xyz[1])/barlen_for_calc*led_spacing
+                        dz=(node2_xyz[2]-node1_xyz[2])/barlen_for_calc*led_spacing
                         writ_bars.add(bar_w_mod_num)
+                        pixel=[node1_xyz[0]+dx_bar_end_space,node1_xyz[1]+dy_bar_end_space,node1_xyz[2]+dz_bar_end_space]
+                        for pixl in range(0,num_pixels):
+                            add_row=[pixel_counter,modul,modul,node_1_name,node_2_name]+pixel+[strip]
+                            strip_pixel=str(strip).zfill(5)+"-"+str(pixel_counter).zfill(8)
+                            write_to_pixel_mapping_file[strip_pixel]=add_row
+                            pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
+                            pixel_counter+=1
 
         #same monkey, different banana
         for bar in cross_module_bars:
             barnods=sorted(list(bar))
+            barset=set(barnods)
             for modul in module_dict:
                 if barnods[0] in module_dict[modul]:
                     node_1_name = barnods[0]+"-"+str(modul)
@@ -759,35 +788,38 @@ if __name__=="__main__":
             if not(node_1_name and node_2_name):
                 print "Bar:",bar,"...dafuq?"
             else:
-                nod1=node_xyz[barnods[0]]
-                nod2=node_xyz[barnods[1]]
-                forward_x = nod1[0]<nod2[0]
+                node1_xyz=node_module_xyz[node_1_name]
+                node2_xyz=node_module_xyz[node_2_name]
                 crossbar_w_mod_num = barnods[0]+"-"+barnods[1]+"-"+str(crossbar_modul)+"-"+str(other_modul)
                 crossbar_physical_name='-'.join([barnods[0],barnods[1],str(crossbar_modul)])
                 if crossbar_w_mod_num not in crossbars_with_module_nums:
                     crossbars_with_module_nums.append(crossbar_w_mod_num)
                 if crossbar_physical_name not in writ_bars:
-                    barlen=xyz_dist(nod1,nod2)
-                    dx=(nod2[0]-nod1[0])/barlen*led_spacing
-                    dy=(nod2[1]-nod1[1])/barlen*led_spacing
-                    dz=(nod2[2]-nod1[2])/barlen*led_spacing
-                    pixel = nod1
-                    node_1_name=node_1_name.split('-')[0]
-                    node_2_name=node_2_name.split('-')[0]
-                    if forward_x:
-                        while pixel[0]<nod2[0]:
-                            pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
-                            add_row=[pixel_counter,crossbar_modul,other_modul,node_1_name,node_2_name]+pixel+[strip]
-                            strip_pixel=str(strip).zfill(5)+"-"+str(pixel_counter).zfill(8)
-                            write_to_pixel_mapping_file[strip_pixel]=add_row
-                            pixel_counter+=1
-                    else:
-                        while pixel[0]>nod2[0]:
-                            pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
-                            add_row=[pixel_counter,crossbar_modul,other_modul,node_1_name,node_2_name]+pixel+[strip]
-                            strip_pixel=str(strip).zfill(5)+"-"+str(pixel_counter).zfill(8)
-                            write_to_pixel_mapping_file[strip_pixel]=add_row
-                            pixel_counter+=1
+                    barlen=xyz_dist(node1_xyz,node2_xyz)
+
+                    bar_len_led_info=get_bar_len_led_info(bar)
+                    strip=9999 #set strip number to 9999 if not specified
+                    bar_mod_key=node_1_name+"-"+node_2_name+"-"+str(modul)
+                    if bar_mod_key in barmodulestripnumbers:
+                        strip=barmodulestripnumbers[bar_mod_key]
+
+                    bar_len,num_pixels=get_bar_len_led_info(barset)
+                    barlen_for_calc=xyz_dist(node1_xyz,node2_xyz)
+                    #3.0 inch space at the end of the bar where the bolt hole is minus 1.5 inches because of where the hole is. this is rough. might need to adjust.
+                    dx_bar_end_space=(node2_xyz[0]-node1_xyz[0])/barlen_for_calc*1.5 
+                    dy_bar_end_space=(node2_xyz[1]-node1_xyz[1])/barlen_for_calc*1.5 
+                    dz_bar_end_space=(node2_xyz[2]-node1_xyz[2])/barlen_for_calc*1.5 
+                    dx=(node2_xyz[0]-node1_xyz[0])/barlen_for_calc*led_spacing
+                    dy=(node2_xyz[1]-node1_xyz[1])/barlen_for_calc*led_spacing
+                    dz=(node2_xyz[2]-node1_xyz[2])/barlen_for_calc*led_spacing
+                    pixel=[node1_xyz[0]+dx_bar_end_space,node1_xyz[1]+dy_bar_end_space,node1_xyz[2]+dz_bar_end_space]
+                    for pixl in range(0,num_pixels):
+                        add_row=[pixel_counter,crossbar_modul,other_modul,barnods[0],barnods[1]]+pixel+[strip]
+                        strip_pixel=str(strip).zfill(5)+"-"+str(pixel_counter).zfill(8)
+                        write_to_pixel_mapping_file[strip_pixel]=add_row
+                        pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
+                        pixel_counter+=1
+
                     writ_bars.add(crossbar_physical_name)
 
         with open(pixelmappingfilename,"wb") as f:
