@@ -454,6 +454,15 @@ def make_polygonal_subset(polygons):
     return add_bars_formatted
 
 
+def left_right_mid(xyz1,xyz2):
+    if xyz1[0] > 6 and xyz2[0] > 6:
+        return "right"
+    elif xyz1[0] < -6 and xyz2[0] < -6:
+        return "left"
+    else:
+        return "mid"
+
+
 def get_module_bar_strip_numbers():
     bar_module_strip_dict=collections.defaultdict()
     with open("Module_Bar_Orders.csv","rb") as f2:
@@ -747,10 +756,11 @@ if __name__=="__main__":
                     dx=(node2_xyz[0]-node1_xyz[0])/barlen_for_calc*led_spacing
                     dy=(node2_xyz[1]-node1_xyz[1])/barlen_for_calc*led_spacing
                     dz=(node2_xyz[2]-node1_xyz[2])/barlen_for_calc*led_spacing
+                    leftrightmid=left_right_mid(node1_xyz,node2_xyz)
                     writ_bars.add(physical_bar_name)
                     pixel=[node1_xyz[0]+dx_bar_end_space,node1_xyz[1]+dy_bar_end_space,node1_xyz[2]+dz_bar_end_space]
                     for pixl in range(0,num_pixels):
-                        add_row=[pixel_counter,modul,modul,inner_outer_mid,node1_alphabetic,node2_alphabetic]+pixel+[strip]
+                        add_row=[pixel_counter,modul,modul,inner_outer_mid,leftrightmid,node1_alphabetic,node2_alphabetic]+pixel+[strip]
                         strip_pixel=str(strip).zfill(5)+"-"+str(pixel_counter).zfill(8)
                         write_to_pixel_mapping_file[strip_pixel]=add_row
                         pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
@@ -800,10 +810,11 @@ if __name__=="__main__":
                         dx=(node2_xyz[0]-node1_xyz[0])/barlen_for_calc*led_spacing
                         dy=(node2_xyz[1]-node1_xyz[1])/barlen_for_calc*led_spacing
                         dz=(node2_xyz[2]-node1_xyz[2])/barlen_for_calc*led_spacing
+                        leftrightmid=left_right_mid(node1_xyz,node2_xyz)
                         writ_bars.add(bar_w_mod_num)
                         pixel=[node1_xyz[0]+dx_bar_end_space,node1_xyz[1]+dy_bar_end_space,node1_xyz[2]+dz_bar_end_space]
                         for pixl in range(0,num_pixels):
-                            add_row=[pixel_counter,modul,modul,inner_outer_mid,node_1_name,node_2_name]+pixel+[strip]
+                            add_row=[pixel_counter,modul,modul,inner_outer_mid,leftrightmid,node_1_name,node_2_name]+pixel+[strip]
                             strip_pixel=str(strip).zfill(5)+"-"+str(pixel_counter).zfill(8)
                             write_to_pixel_mapping_file[strip_pixel]=add_row
                             pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
@@ -849,9 +860,10 @@ if __name__=="__main__":
                     dx=(node2_xyz[0]-node1_xyz[0])/barlen_for_calc*led_spacing
                     dy=(node2_xyz[1]-node1_xyz[1])/barlen_for_calc*led_spacing
                     dz=(node2_xyz[2]-node1_xyz[2])/barlen_for_calc*led_spacing
+                    leftrightmid=left_right_mid(node1_xyz,node2_xyz)
                     pixel=[node1_xyz[0]+dx_bar_end_space,node1_xyz[1]+dy_bar_end_space,node1_xyz[2]+dz_bar_end_space]
                     for pixl in range(0,num_pixels):
-                        add_row=[pixel_counter,crossbar_modul,other_modul,inner_outer_mid,barnods[0],barnods[1]]+pixel+[strip]
+                        add_row=[pixel_counter,crossbar_modul,other_modul,inner_outer_mid,leftrightmid,barnods[0],barnods[1]]+pixel+[strip]
                         strip_pixel=str(strip).zfill(5)+"-"+str(pixel_counter).zfill(8)
                         write_to_pixel_mapping_file[strip_pixel]=add_row
                         pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
@@ -861,7 +873,7 @@ if __name__=="__main__":
 
         with open(pixelmappingfilename,"wb") as f:
             wrtr=csv.writer(f)
-            wrtr.writerow(["Pixel_i","Module1","Module2","Inner_Outer","Node1","Node2","X","Y","Z","Strip"])
+            wrtr.writerow(["Pixel_i","Module1","Module2","Inner_Outer","Left_Right_Mid","Node1","Node2","X","Y","Z","Strip"])
             for strip_pixl_cnt in sorted(write_to_pixel_mapping_file.keys()):
                 wrtr.writerow(write_to_pixel_mapping_file[strip_pixl_cnt])
 
@@ -930,6 +942,7 @@ if __name__=="__main__":
                 ground="0"
             inner_outer=in_out_nodes[nodenam]
 
+            leftrightmid=left_right_mid(nod_xyz,nod_xyz)
             nodes_dict[nodenam]=[nodenam]+nod_xyz+[subnods,nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules,ground,inner_outer]
             nodes_modules_dict[nod]=[nod,nodenam,modul]+xyz+[nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules,ground,inner_outer]
 
@@ -984,6 +997,8 @@ if __name__=="__main__":
                         max_y=xyz[1]
                     if xyz[2]>max_z:
                         max_z=xyz[2]
+                node_1_xyz=node_module_xyz[physnods[0]]
+                node_2_xyz=node_module_xyz[physnods[1]]
                 physbars='_'.join(physbars)
                 physnods='_'.join(physnods)
                 adjacent_nods=[]
@@ -1009,7 +1024,8 @@ if __name__=="__main__":
                         if pnodbar not in physbars and pnodbar not in adjacent_phys_bars and 'FEW' not in pnodbar:
                             adjacent_phys_bars.append(pnodbar)
                 inner_outer_mid=in_out_mid_bars[testnam]
-                bars_dict[barstr]=[barstr,moduls,min_x,min_y,min_z,max_x,max_y,max_z,nodenams,physbars,adjacent_nods,physnods,adjacent_phys_bars,adjacent_bars,adjacent_phys_nods,ground,inner_outer_mid]
+                leftrightmid=left_right_mid(node_1_xyz,node_2_xyz)
+                bars_dict[barstr]=[barstr,moduls,min_x,min_y,min_z,max_x,max_y,max_z,nodenams,physbars,adjacent_nods,physnods,adjacent_phys_bars,adjacent_bars,adjacent_phys_nods,ground,inner_outer_mid, leftrightmid]
 
 
         modelnodeinfofilename = modelinfo_output_directory+"/%s/Model_Node_Info.csv"%(filename_append)
@@ -1017,34 +1033,10 @@ if __name__=="__main__":
         modelbarinfofilename = modelinfo_output_directory+"/%s/Model_Bar_Info.csv"%(filename_append)
 
 
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
-        #YOU ARE WORKING ON THE INNER AND OUTER NODES RIGHT NOW
 
         with open(modelnodeinfofilename,"wb") as f:
             wrtr=csv.writer(f)
-            wrtr.writerow(["Node","X","Y","Z","Subnodes","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground","Inner_Outer"])
+            wrtr.writerow(["Node","X","Y","Z","Subnodes","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground","Inner_Outer","Left_Right_Mid"])
             for nod in nodes_dict:
                 wrtr.writerow(nodes_dict[nod])
 
@@ -1052,14 +1044,14 @@ if __name__=="__main__":
 
         with open(structuralnodeinfofilename,"wb") as f:
             wrtr=csv.writer(f)
-            wrtr.writerow(["Node_with_Module","Node","Module","X","Y","Z","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground","Inner_Outer"])
+            wrtr.writerow(["Node_with_Module","Node","Module","X","Y","Z","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground","Inner_Outer","Left_Right_Mid"])
             for nod in nodes_modules_dict:
                 wrtr.writerow(nodes_modules_dict[nod])
 
 
         with open(modelbarinfofilename,"wb") as f:
             wrtr=csv.writer(f)
-            wrtr.writerow(["Bar_name","Modules","Min_X","Min_Y","Min_Z","Max_X","Max_Y","Max_Z","Nodes","Physical_Bars","Physical_Nodes","Adjacent_Nodes","Adjacent_Physical_Bars","Adjacent_Bars","Adjacent_Physical_Nodes","Ground","Inner_Outer"])
+            wrtr.writerow(["Bar_name","Modules","Min_X","Min_Y","Min_Z","Max_X","Max_Y","Max_Z","Nodes","Physical_Bars","Physical_Nodes","Adjacent_Nodes","Adjacent_Physical_Bars","Adjacent_Bars","Adjacent_Physical_Nodes","Ground","Inner_Outer","Left_Right_Mid"])
             for bar in bars_dict:
                 wrtr.writerow(bars_dict[bar])
 
