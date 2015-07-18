@@ -1007,8 +1007,8 @@ if __name__=="__main__":
             inner_outer=in_out_nodes[nodenam]
 
             leftrightmid=left_right_mid(nod_xyz,nod_xyz)
-            nodes_dict[nodenam]=[nodenam]+nod_xyz+[subnods,nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules,ground,inner_outer]
-            nodes_modules_dict[nod]=[nod,nodenam,modul]+xyz+[nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules,ground,inner_outer]
+            nodes_dict[nodenam]=[nodenam]+nod_xyz+[subnods,nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules,ground,inner_outer, leftrightmid]
+            nodes_modules_dict[nod]=[nod,nodenam,modul]+xyz+[nod_nods,nod_bars,nod_bars_w_modules,nod_nods_w_modules,ground,inner_outer, leftrightmid]
 
 
 
@@ -1086,15 +1086,18 @@ if __name__=="__main__":
                     for pnodbar in nod_pbars:
                         if pnodbar not in physbars and pnodbar not in adjacent_phys_bars and 'FEW' not in pnodbar:
                             adjacent_phys_bars.append(pnodbar)
+                adjacent_nods='_'.join(adjacent_nods)
+                adjacent_phys_nods='_'.join(adjacent_phys_nods)
+                adjacent_bars='_'.join(adjacent_bars)
+                adjacent_phys_bars='_'.join(adjacent_phys_bars)
                 inner_outer_mid=in_out_mid_bars[testnam]
                 leftrightmid=left_right_mid(node_1_xyz,node_2_xyz)
-                bars_dict[barstr]=[barstr,modul,min_x,min_y,min_z,max_x,max_y,max_z,nodenams,physbars,adjacent_nods,physnods,adjacent_phys_bars,adjacent_bars,adjacent_phys_nods,ground,inner_outer_mid, leftrightmid]
+                bars_dict[barstr]=[barstr,modul,min_x,min_y,min_z,max_x,max_y,max_z,nodenams,physbars,physnods,adjacent_nods,adjacent_phys_bars,adjacent_bars,adjacent_phys_nods,ground,inner_outer_mid, leftrightmid]
 
 
         modelnodeinfofilename = modelinfo_output_directory+"/%s/Model_Node_Info.csv"%(filename_append)
         structuralnodeinfofilename = modelinfo_output_directory+"/%s/Structural_Node_Info.csv"%(filename_append)
         modelbarinfofilename = modelinfo_output_directory+"/%s/Model_Bar_Info.csv"%(filename_append)
-
 
 
         with open(modelnodeinfofilename,"wb") as f:
