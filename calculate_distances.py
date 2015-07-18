@@ -11,6 +11,34 @@ ground_nodes = ["WAX","AIM","LID","BOX","HUG","FLU","SIR","ONO","TAT","COP","NEW
 
 modelinfo_output_directory="mapping_datasets"
 
+def get_node_module_xyz():
+    module_dict=collections.defaultdict()
+    node_xyz=collections.defaultdict()
+    node_module_xyz=collections.defaultdict()
+    active_nodes=False
+    with open("node_locations_150501_zeroed.csv","rU") as f:
+        rdr=csv.reader(f)
+        rdr.next()
+        for line in rdr:
+            modul=line[0]
+            node=line[1]
+            x=float(line[2])
+            y=float(line[3])
+            z=float(line[4])
+            add_node = True
+            if active_nodes:
+                if node in active_nodes:
+                    add_node = True
+                else:
+                    add_node = False
+            if add_node:
+                if modul not in module_dict:
+                    module_dict[modul]=set()
+                module_dict[modul].add(node)
+                node_xyz[node]=[x,y,z] #just for cross module bars
+                node_module_xyz[node+"-"+str(modul)]=[x,y,z]
+    return node_module_xyz
+
 
 def inner_outer_errthing():
     in_out_mid_bars=collections.defaultdict()
@@ -81,6 +109,33 @@ def get_bars():
     return bars
     
 
+#finds the double bars, chooses the lower one (z-index wise) and adds it to a list of things not to be used in the model.
+def remove_double_bars():
+    double_bars_begone=[]
+    bars=collections.defaultdict()
+    node_module_xyz=get_node_module_xyz()
+    with open("DBL2_module_edges.csv","rb") as f:
+        rdr=csv.reader(f)
+        rdr.next()
+        for row in rdr:
+            barname=row[0]
+            baraslist=row[0].split('-')
+            bar='-'.join(sorted(baraslist[:2]))
+            modul=baraslist[2]
+            if bar not in bars:
+                bars[bar]=[]
+            bars[bar].append(modul)
+    for bar in bars:
+        if len(bars[bar])>1:
+            nodea=bar[:4]+bars[bar][0]
+            nodeb=bar[:4]+bars[bar][1]
+            z1=node_module_xyz[nodea][2]
+            z2=node_module_xyz[nodeb][2]
+            if z1>z2:
+                double_bars_begone.append(bar+"-"+bars[bar][1])
+            else:
+                double_bars_begone.append(bar+"-"+bars[bar][0])
+    return double_bars_begone
 
 
 def get_ground_bars():
@@ -496,10 +551,10 @@ if __name__=="__main__":
     bar_subsets.append(fullBrainSubset)
 
     #PUT THE EXPERIMENTAL BAR SUBSET HERE
-    filename_append = "Partial_Brain"
-    active_bars = ["NIL-AHI","NIL-TOY","NIL-EON","NIL-JOB","NIL-JUG","NIL-ERA","NIL-ADO","JOB-ADO","JOB-NAY","JOB-NIL","JOB-JUG","JOB-TOY","JUG-ERA","JUG-RIB","JUG-SOY","JUG-AHI"] # BAR LIST GOES HERE
-    partialBrainSubset = BarSubset(active_bars,filename_append)
-    bar_subsets.append(partialBrainSubset)
+ #   filename_append = "Partial_Brain"
+ #   active_bars = ["NIL-AHI","NIL-TOY","NIL-EON","NIL-JOB","NIL-JUG","NIL-ERA","NIL-ADO","JOB-ADO","JOB-NAY","JOB-NIL","JOB-JUG","JOB-TOY","JUG-ERA","JUG-RIB","JUG-SOY","JUG-AHI"] # BAR LIST GOES HERE
+ #   partialBrainSubset = BarSubset(active_bars,filename_append)
+ #   bar_subsets.append(partialBrainSubset)
 
 
 
@@ -525,15 +580,15 @@ if __name__=="__main__":
 
 
     #PUT THE EXPERIMENTAL BAR SUBSET HERE
-    filename_append = "Algorithmic_Brain"
-    active_bars = make_bars_subset(400)
-    algorithmicBrainSubset = BarSubset(active_bars,filename_append)
-    bar_subsets.append(algorithmicBrainSubset)
+#    filename_append = "Algorithmic_Brain"
+#    active_bars = make_bars_subset(400)
+#    algorithmicBrainSubset = BarSubset(active_bars,filename_append)
+#    bar_subsets.append(algorithmicBrainSubset)
 
 
 
 
-    filename_append = "Outer_Plus_algorithmic_inner"
+    filename_append = "Outer_plus_algorithmic_inner"
     polygons=load_polygons() #or to make from scratch, find_polygons_in_outer_shell(). Takes a little while though.
     selected_mid_bars=make_polygonal_subset(polygons)
     ground_bars,ground_bars_plus=get_ground_bars()
@@ -550,6 +605,7 @@ if __name__=="__main__":
 
 
     for bar_subset in bar_subsets:
+        low_double_bars=remove_double_bars()
         in_out_mid_bars,in_out_nodes=inner_outer_errthing()
         #load things from the object
         active_nodes = bar_subset.active_nodes
@@ -615,7 +671,6 @@ if __name__=="__main__":
                     cross_module_bars.append(nodes_set)
 
 
-
         node_xyz=collections.defaultdict()
         node_module_xyz=collections.defaultdict()
         module_dict=collections.defaultdict()
@@ -664,7 +719,7 @@ if __name__=="__main__":
                 in_module=True
                 for barnode in bar:
                     if barnode not in nods:
-                        in_module=False
+                        in_module=False 
                 if in_module:
                     if bar not in module_bars:
                         barnods=list(bar)
@@ -725,7 +780,7 @@ if __name__=="__main__":
 
         write_to_pixel_mapping_file=collections.defaultdict()
         led_spacing=0.656168 #inches. the model is in inches. TODO: Use millimeters. One day we will be free from tyanny. And inches.
-        
+        bars_in_write_order=[]
         writ_bars=set()
         #first, load the strips that are defined (when we go full-brain, this will be *every* strip we use)
         pixel_counter=0
@@ -736,12 +791,15 @@ if __name__=="__main__":
                 modul=row[0]
                 bar_as_list=row[1].split('-')
                 bar_as_bar_name='-'.join(sorted(bar_as_list))
+                barnamewithmodule=bar_as_bar_name+"-"+str(modul)
                 inner_outer_mid=in_out_mid_bars[bar_as_bar_name]
                 strip=row[2]
                 bar_as_list_alphabetical=sorted(bar_as_list)
                 barset=set(bar_as_list)
-                if barset in bars:
+                if barset in bars and barnamewithmodule not in low_double_bars:
                     #print bar_as_list
+                    if bar_as_bar_name not in bars_in_write_order:
+                        bars_in_write_order.append(bar_as_bar_name)
                     node1_alphabetic=bar_as_list_alphabetical[0]
                     node2_alphabetic=bar_as_list_alphabetical[1]
                     node1_xyz=node_module_xyz[node1_alphabetic+"-"+str(modul)]
@@ -774,10 +832,14 @@ if __name__=="__main__":
             nods=module_dict[modul]
             for bar in bars:
                 in_module=True
+                bar_as_bar_name='-'.join(sorted(list(bar)))
+                barnamewithmodule='-'.join(sorted(list(bar)))+"-"+str(modul)
                 for barnode in bar:
                     if barnode not in nods:
                         in_module=False
-                if in_module:
+                if in_module and barnamewithmodule not in low_double_bars:
+                    if bar_as_bar_name not in bars_in_write_order:
+                        bars_in_write_order.append(bar_as_bar_name)
                     #for consistency always have bar node pairs in alphabetical order
                     #Earlier, this was by x-position but was changed because alphabetical is going to make things easier down the line
                     barnods=sorted(list(bar))
@@ -843,6 +905,8 @@ if __name__=="__main__":
                 if crossbar_w_mod_num not in crossbars_with_module_nums:
                     crossbars_with_module_nums.append(crossbar_w_mod_num)
                 if crossbar_physical_name not in writ_bars:
+                    if bar_sans_mod_num not in bars_in_write_order:
+                        bars_in_write_order.append(bar_sans_mod_num)
                     barlen=xyz_dist(node1_xyz,node2_xyz)
 
                     bar_len_led_info=get_bar_len_led_info(bar)
@@ -968,15 +1032,14 @@ if __name__=="__main__":
                         nodone,nodtoo,modnum=mbar.split('-')
                         physnods.append(nodone+"-"+modnum)
                         physnods.append(nodtoo+"-"+modnum)
-                        moduls.append(str(modnum))
+                        modul=str(modnum)
                 for mbar in crossbars_with_module_nums:
                     if sbar[0] in mbar and sbar[1] in mbar:
                         physbars.append('-'.join(mbar.split('-')[:3]))
                         nodone,nodtoo,modulone,modultoo=mbar.split('-')
                         physnods.append(nodone+"-"+modulone)
                         physnods.append(nodtoo+"-"+modultoo)
-                        moduls.append(str(modulone))
-                moduls='_'.join(moduls)
+                        modul=str(modulone)
                 min_x=10000
                 min_y=10000
                 min_z=10000
@@ -1025,7 +1088,7 @@ if __name__=="__main__":
                             adjacent_phys_bars.append(pnodbar)
                 inner_outer_mid=in_out_mid_bars[testnam]
                 leftrightmid=left_right_mid(node_1_xyz,node_2_xyz)
-                bars_dict[barstr]=[barstr,moduls,min_x,min_y,min_z,max_x,max_y,max_z,nodenams,physbars,adjacent_nods,physnods,adjacent_phys_bars,adjacent_bars,adjacent_phys_nods,ground,inner_outer_mid, leftrightmid]
+                bars_dict[barstr]=[barstr,modul,min_x,min_y,min_z,max_x,max_y,max_z,nodenams,physbars,adjacent_nods,physnods,adjacent_phys_bars,adjacent_bars,adjacent_phys_nods,ground,inner_outer_mid, leftrightmid]
 
 
         modelnodeinfofilename = modelinfo_output_directory+"/%s/Model_Node_Info.csv"%(filename_append)
@@ -1051,8 +1114,8 @@ if __name__=="__main__":
 
         with open(modelbarinfofilename,"wb") as f:
             wrtr=csv.writer(f)
-            wrtr.writerow(["Bar_name","Modules","Min_X","Min_Y","Min_Z","Max_X","Max_Y","Max_Z","Nodes","Physical_Bars","Physical_Nodes","Adjacent_Nodes","Adjacent_Physical_Bars","Adjacent_Bars","Adjacent_Physical_Nodes","Ground","Inner_Outer","Left_Right_Mid"])
-            for bar in bars_dict:
+            wrtr.writerow(["Bar_name","Module","Min_X","Min_Y","Min_Z","Max_X","Max_Y","Max_Z","Nodes","Physical_Bars","Physical_Nodes","Adjacent_Nodes","Adjacent_Physical_Bars","Adjacent_Bars","Adjacent_Physical_Nodes","Ground","Inner_Outer","Left_Right_Mid"])
+            for bar in bars_in_write_order:
                 wrtr.writerow(bars_dict[bar])
 
 
