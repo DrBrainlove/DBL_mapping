@@ -1105,12 +1105,11 @@ if __name__=="__main__":
 
 
 
-        with open(structuralnodeinfofilename,"wb") as f:
-            wrtr=csv.writer(f)
-            wrtr.writerow(["Node_with_Module","Node","Module","X","Y","Z","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground","Inner_Outer","Left_Right_Mid"])
-            for nod in nodes_modules_dict:
-                wrtr.writerow(nodes_modules_dict[nod])
-
+#        with open(structuralnodeinfofilename,"wb") as f:
+#            wrtr=csv.writer(f)
+#            wrtr.writerow(["Node_with_Module","Node","Module","X","Y","Z","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground","Inner_Outer","Left_Right_Mid"])
+#            for nod in nodes_modules_dict:
+#                wrtr.writerow(nodes_modules_dict[nod])
 
         with open(modelbarinfofilename,"wb") as f:
             wrtr=csv.writer(f)
