@@ -1,0 +1,327 @@
+import os,csv, math, collections, random, time,datetime, traceback
+import pickle
+
+
+ground_nodes = ["WAX","AIM","LID","BOX","HUG","FLU","SIR","ONO","TAT","COP","NEW","GET","OAK","CAB","AMP","YAY","HAY","BAM","CIS","OFF","WHO","NIX","PIE","RUM","SIP"]
+
+modelinfo_output_directory="mapping_datasets"
+
+led_spacing=0.656168 #inches. Le sigh. 
+
+def get_node_xyz():
+    node_xyz=collections.defaultdict()
+    with open("node_info_DBL1.csv","rU") as f:
+        rdr=csv.reader(f)
+        rdr.next()
+        for line in rdr:
+            node=line[0]
+            x=float(line[1])
+            y=float(line[2])
+            z=float(line[3])
+            node_xyz[node]=[x,y,z] #just for cross module bars
+    return node_xyz
+
+
+def subset_shells(file_to_load):
+    """ parameter target is not used, vestigial? """
+    all_bars = []
+    with open(file_to_load,'r') as f:
+        rdr = csv.reader(f)
+        for line in rdr:
+            all_bars.append(line[0])
+    return all_bars
+
+
+def get_outer_nodes():
+    outer_bars=subset_shells("outer_bars.csv")
+    outer_bars_sets=[]
+    outer_nodes=[]
+    for bar in outer_bars:
+         outer_bars_sets.append(set(bar.split('-')))
+    for bar in outer_bars_sets:
+        for node in bar:
+            if node not in outer_nodes:
+                outer_nodes.append(node)
+    return outer_nodes
+
+def inner_outer_errthing():
+    in_out_mid_bars=collections.defaultdict()
+    in_out_nodes=collections.defaultdict()
+    filename_designations=[("inner_bars.csv","inner"),("outer_bars.csv","outer"),("in_to_out_bars.csv","in_to_out")]
+
+    #handle bars
+    for fildes in filename_designations:
+        fil=fildes[0]
+        des=fildes[1]
+        with open(fil) as f:
+            rdr=csv.reader(f)
+            for row in rdr:
+                nodes=row[0].split('-')
+                bar='-'.join(sorted(nodes))
+                in_out_mid_bars[bar]=des
+
+    #handle nodes
+    for bar in in_out_mid_bars:
+        if in_out_mid_bars[bar]=="inner":
+            for node in bar.split('-'):
+                in_out_nodes[node]="inner"
+        if in_out_mid_bars[bar]=="outer":
+            for node in bar.split('-'):
+                in_out_nodes[node]="outer"
+    return in_out_mid_bars,in_out_nodes
+
+
+
+def get_bars():
+    bars=[]
+    node_connections = collections.defaultdict()
+    with open("node_info_DBL1.csv","rb") as f:
+        rdr=csv.reader(f)
+        rdr.next()
+        for line in rdr:
+          startnod=line[0]
+          for x in [4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34]:
+             if len(line)>=x+1:
+                endnod=line[x]
+                nodes_set=set([startnod,endnod])
+                if nodes_set not in bars: #avoid duplicates
+                    bars.append(nodes_set)
+    return bars
+
+
+
+def get_ground_bars():
+    outer_nodes=get_outer_nodes()
+    bars=get_bars()
+    ground_bars=[]
+    ground_bars_plus=[]
+    nodes_counts=collections.defaultdict()
+    for bar in bars:
+        both_ground_nodes=True
+        one_ground_node=False
+        for node in bar:
+            if node not in ground_nodes:
+                both_ground_nodes=False
+            else:
+                one_ground_node=True
+                groundnod=node
+                if groundnod not in nodes_counts:
+                    nodes_counts[groundnod]=0
+        barinformat='-'.join(sorted(list(bar)))
+        if both_ground_nodes:
+            ground_bars.append(barinformat)
+            ground_bars_plus.append(barinformat)
+        if one_ground_node and not both_ground_nodes: 
+            if nodes_counts[groundnod]<4 and groundnod not in outer_nodes:
+                nodes_counts[groundnod]+=1
+                ground_bars_plus.append(barinformat)
+    return ground_bars, ground_bars_plus
+
+
+
+
+def xyz_dist(point1,point2):
+    return math.sqrt(math.pow((point2[0]-point1[0]),2) +  math.pow((point2[1]-point1[1]),2) + math.pow((point2[2]-point1[2]),2))
+
+
+
+def get_other_node(barset,node):
+    if node in barset:
+        for node_i in barset:
+            if node_i != node:
+                return node_i
+    return False
+
+
+
+def get_bar_len_led_info(bar):
+    barinfo=collections.defaultdict()
+    with open("DBL2_edgelengths_with_led_counts.csv","rb") as f:
+        rdr=csv.reader(f)
+        for row in rdr:
+            barnamset=set(row[0].split('-'))
+            if barnamset==bar:
+                bar_len=float(row[1])
+                num_leds=int(row[3])
+                return bar_len,num_leds
+    return False
+
+
+
+def left_right_mid(xyz1,xyz2):
+    if xyz1[0] > 6 and xyz2[0] > 6:
+        return "right"
+    elif xyz1[0] < -6 and xyz2[0] < -6:
+        return "left"
+    else:
+        return "mid"
+
+
+def bar_to_str(bar):
+    return '-'.join(sorted(list(bar)))
+
+
+def write_files(filename_append,bars,nodes_xyz):
+
+
+    modelnodeinfofilename = modelinfo_output_directory+"/%s/Model_Node_Info.csv"%(filename_append)
+    modelbarinfofilename = modelinfo_output_directory+"/%s/Model_Bar_Info.csv"%(filename_append)
+    pixelmappingfilename = modelinfo_output_directory+"/%s/pixel_mapping.csv"%(filename_append)
+
+    in_out_mid_bars,in_out_nodes = inner_outer_errthing()
+    groundbars=get_ground_bars()
+
+    with open(modelnodeinfofilename,"wb") as f:
+        wrtr=csv.writer(f)
+        wrtr.writerow(["Node","X","Y","Z","Subnodes","Neighbor_Nodes","Bars","Physical_Bars","Physical_Nodes","Ground","Inner_Outer","Left_Right_Mid"])
+        for node in nodes_xyz:
+            
+            #get neighboring bars and nodes
+            neighbornodes=[]
+            neighborbars=[]
+            for bar in bars:
+                if node in bar:
+                    othernode=get_other_node(bar,node)
+                    neighbornodes.append(othernode)
+                    neighborbars.append(bar_to_str(bar))
+            neighbornodes='_'.join(neighbornodes)
+            neighborbars='_'.join(neighborbars)
+            
+            #is it a ground node?
+            if node in ground_nodes:
+                ground="1"
+            else:
+                ground="0"
+
+            #inner shell or outer shell?
+            inner_outer=in_out_nodes[node]
+
+            #which hemisphere?
+            leftrightmid=left_right_mid(nodes_xyz[node],nodes_xyz[node])
+
+            #make the row to put in the file
+            row=[node]+nodes_xyz[node]+["DEPRECATED",neighbornodes,neighborbars,"DEPRECATED","DEPRECATED",ground,inner_outer,leftrightmid]
+            wrtr.writerow(row)
+
+
+
+
+    with open(modelbarinfofilename,"wb") as f:
+        wrtr=csv.writer(f)
+        wrtr.writerow(["Bar_name","Module","Min_X","Min_Y","Min_Z","Max_X","Max_Y","Max_Z","Nodes","Physical_Bars","Physical_Nodes","Adjacent_Nodes","Adjacent_Physical_Bars","Adjacent_Bars","Adjacent_Physical_Nodes","Ground","Inner_Outer","Left_Right_Mid"])
+        for bar in bars:
+            barstr=bar_to_str(bar)
+            module="1" #for now. we'll see if I need to rewrite this
+
+            #get the min max xyz based on the nodes of the bar
+            min_x=10000
+            min_y=10000
+            min_z=10000
+            max_x=-10000
+            max_y=-10000
+            max_z=-10000
+            for node in bar:
+                xyz=nodes_xyz[node]
+                if xyz[0]<min_x:
+                    min_x=xyz[0]
+                if xyz[1]<min_y:
+                    min_y=xyz[1]
+                if xyz[2]<min_z:
+                    min_z=xyz[2]
+                if xyz[0]>max_x:
+                    max_x=xyz[0]
+                if xyz[1]>max_y:
+                    max_y=xyz[1]
+                if xyz[2]>max_z:
+                    max_z=xyz[2]
+
+            nodes = '_'.join(sorted(list(bar)))
+
+
+            #get neighboring bars and nodes
+            adjacentnodes=[]
+            adjacentbars=[]
+            for node in bar:
+                for bar_in_whole_model in bars:
+                    if node in bar_in_whole_model:
+                        othernode=get_other_node(bar_in_whole_model,node)
+                        adjacentnodes.append(othernode)
+                        adjacentbars.append(bar_to_str(bar_in_whole_model))
+            adjacentnodes='_'.join(adjacentnodes)
+            adjacentbars='_'.join(adjacentbars)
+
+
+            ground=1
+            for node in bar:
+                if node not in ground_nodes:
+                    ground=0
+            innerouter=in_out_mid_bars[barstr]
+
+            node_1=sorted(list(bar))[0]
+            node_2=sorted(list(bar))[1]
+            node_1_xyz = nodes_xyz[node_1]
+            node_2_xyz = nodes_xyz[node_2]
+
+            leftrightmid=left_right_mid(node_1_xyz,node_2_xyz)
+            
+            row=[barstr,module,min_x,min_y,min_z,max_x,max_y,max_z,nodes,"DEPRECATED","DEPRECATED",adjacentnodes,"DEPRECATED",adjacentbars,"DEPRECATED",ground,innerouter,leftrightmid]
+            wrtr.writerow(row)
+
+
+
+
+    with open(pixelmappingfilename,"wb") as f:
+        wrtr=csv.writer(f)
+        wrtr.writerow(["Pixel_i","Module1","Module2","Inner_Outer","Left_Right_Mid","Node1","Node2","X","Y","Z","Strip"])
+        pixel_i=0
+        for bar in bars:
+            barstr=bar_to_str(bar)
+            node_1=sorted(list(bar))[0]
+            node_2=sorted(list(bar))[1]
+            node_1_xyz = nodes_xyz[node_1]
+            node_2_xyz = nodes_xyz[node_2]                    
+            strip=9999 #set strip number to 9999 if not specified
+            module=1 #no moar modules but keeping this here in case we end up using them to divvy up where shit goes
+            #STRIP LOGIC GOES HERE LATER
+
+            bar_len,num_pixels=get_bar_len_led_info(bar)
+            barlen_for_calc=xyz_dist(node_1_xyz,node_2_xyz)
+
+            inner_outer_mid=in_out_mid_bars[barstr]
+            leftrightmid=left_right_mid(node_1_xyz,node_2_xyz)
+
+            #3.0 inch space at the end of the bar where the bolt hole is minus 1.5 inches because of where the hole is. this is rough. might need to adjust.
+            dx_bar_end_space=(node_2_xyz[0]-node_1_xyz[0])/barlen_for_calc*1.5 
+            dy_bar_end_space=(node_2_xyz[1]-node_1_xyz[1])/barlen_for_calc*1.5 
+            dz_bar_end_space=(node_2_xyz[2]-node_1_xyz[2])/barlen_for_calc*1.5 
+            dx=(node_2_xyz[0]-node_1_xyz[0])/barlen_for_calc*led_spacing
+            dy=(node_2_xyz[1]-node_1_xyz[1])/barlen_for_calc*led_spacing
+            dz=(node_2_xyz[2]-node_1_xyz[2])/barlen_for_calc*led_spacing
+            pixel=[node_1_xyz[0]+dx_bar_end_space,node_1_xyz[1]+dy_bar_end_space,node_1_xyz[2]+dz_bar_end_space]
+            for pixl in range(0,num_pixels):
+                add_row=[pixel_i,module,module,inner_outer_mid,leftrightmid,node_1,node_2]+pixel+[strip]
+                strip_pixel=str(strip).zfill(5)+"-"+str(pixel_i).zfill(8)
+                pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
+                pixel_i+=1
+                wrtr.writerow(add_row)
+
+    print "SUBSET NAME: ",filename_append
+    print "BARS: ", len(bars)
+    print "PIXELS: ", pixel_i
+    print "METERS OF STRIP: ", pixel_i/60
+
+
+
+if __name__=="__main__":
+
+    bar_subsets = []
+
+    filename_append = "Full_Brain"
+    active_bars = get_bars()
+    active_nodes_xyz=get_node_xyz()
+    write_files(filename_append,active_bars,active_nodes_xyz)
+        
+
+
+
+    

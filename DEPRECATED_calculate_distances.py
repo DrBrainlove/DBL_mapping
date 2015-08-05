@@ -1,10 +1,11 @@
+
 import os,csv, math, collections, random, time,datetime, traceback
 import pickle
 
 
 
 
-#TODO: This code works but it needs organization and cleanup.
+#DEPRECATED
 
 
 ground_nodes = ["WAX","AIM","LID","BOX","HUG","FLU","SIR","ONO","TAT","COP","NEW","GET","OAK","CAB","AMP","YAY","HAY","BAM","CIS","OFF","WHO","NIX","PIE","RUM","SIP"]
@@ -492,9 +493,15 @@ def make_polygonal_subset(polygons):
             add_bars.append(trybar)
             new_bars_added+=1
         iterations=0
-        while new_bars_added < (gonalness+1)/2:
+        how_many_bars_limit = (gonalness+1)/2
+
+        #randomly reduce the # bars for a polygon to reduce overal polygon count
+        if how_many_bars_limit > 2:
+            how_many_bars_limit-=1
+
+        while new_bars_added < how_many_bars_limit:
             iterations+=1
-            position_in_polygon+=2
+            position_in_polygon+=3
             position_in_polygon=position_in_polygon % len(polygon_as_ordered_list)
             trybar=set([maxedoutnodes[0], polygon_as_ordered_list[position_in_polygon]])
             if trybar in new_potential_bars:
