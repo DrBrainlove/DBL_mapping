@@ -8,17 +8,69 @@ modelinfo_output_directory="mapping_datasets"
 
 led_spacing=0.656168 #inches. Le sigh. 
 
-def get_node_xyz():
-    node_xyz=collections.defaultdict()
-    with open("node_info_DBL1.csv","rU") as f:
+bar_strip_numbers=[]
+bar_strip_numbers_dict=collections.defaultdict()
+with open("Strip_Channel_Mapping.csv","rb") as f:
+    rdr=csv.reader(f)
+    rdr.next()
+    for row in rdr:
+        bar=row[1]
+        strip=row[2]
+        barname='-'.join(sorted(bar.split('-')))
+        bar_strip_numbers.append([barname,strip])
+        bar_strip_numbers_dict[barname]=strip
+
+
+
+bars_with_clipped_pixels = collections.defaultdict()
+with open("chopped_pixels.csv","rb") as f:
+    rdr=csv.reader(f)
+    for row in rdr:
+        nodes=row[:1]
+        clipped=int(row[2])
+        barname='-'.join(sorted(nodes))
+        bars_with_clipped_pixels[barname]=clipped
+
+
+def get_subset_bars_and_nodes():
+    subset_bars=[]
+    subset_nodes=[]
+    with open("400m_subset_Model_Bar_Info.csv","rb") as f:
         rdr=csv.reader(f)
         rdr.next()
+        for row in rdr:
+            barname=row[0]
+            barset=set(barname.split('-'))
+            if barset not in subset_bars:
+                subset_bars.append(barset)
+            for node in barset:
+                if node not in subset_nodes:
+                    subset_nodes.append(node)
+    #manually added HOW-RUM and RUM-SHY, they're right near the door and it'll look better. 
+    #commented out, only needed to do it once but keeping this here as a reminder that these bars were added.
+    #remove this later (after the 2015 burn)
+   #""" subset_bars.append(set(["RUM","SHY"]))
+   # subset_bars.append(set(["RUM","HOW"]))
+   # subset_bars.append(set(["SHY","HOW"]))
+   # for node in ["RUM","SHY","HOW"]:
+   #     if node not in subset_nodes:
+   #         subset_nodes.append(node)"""
+    return subset_bars, subset_nodes
+
+
+
+
+def get_node_xyz():
+    node_xyz=collections.defaultdict()
+    with open("DBL1_Node_Coords_zeroed.csv","rU") as f:
+        rdr=csv.reader(f)
         for line in rdr:
             node=line[0]
             x=float(line[1])
             y=float(line[2])
             z=float(line[3])
-            node_xyz[node]=[x,y,z] #just for cross module bars
+            if node!="FEW":
+                node_xyz[node]=[x,y,z] 
     return node_xyz
 
 
@@ -84,7 +136,7 @@ def get_bars():
              if len(line)>=x+1:
                 endnod=line[x]
                 nodes_set=set([startnod,endnod])
-                if nodes_set not in bars: #avoid duplicates
+                if nodes_set not in bars and "FEW" not in nodes_set: #avoid duplicates
                     bars.append(nodes_set)
     return bars
 
@@ -140,12 +192,23 @@ def get_bar_len_led_info(bar):
         rdr=csv.reader(f)
         for row in rdr:
             barnamset=set(row[0].split('-'))
+            barnamstr='-'.join(sorted(list(barnamset)))
             if barnamset==bar:
                 bar_len=float(row[1])
                 num_leds=int(row[3])
+                if barnamstr in bars_with_clipped_pixels:
+                    num_leds = num_leds-bars_with_clipped_pixels[barnamstr]
                 return bar_len,num_leds
     return False
 
+
+def get_modules_for_wiring():
+    modulesdict=collections.defaultdict()
+    with open("subset_modules_for_wiring.csv","rb") as f:
+        rdr=csv.reader(f)
+        for row in rdr:
+            modulesdict[row[0]]=int(row[1])
+    return modulesdict
 
 
 def left_right_mid(xyz1,xyz2):
@@ -160,16 +223,175 @@ def left_right_mid(xyz1,xyz2):
 def bar_to_str(bar):
     return '-'.join(sorted(list(bar)))
 
+def are_bars_adjacent(bar1,bar2):
+    if bar1==bar2:
+        return False
+    allnodes=set()
+    for node in bar1:
+        allnodes.add(node)
+    for node in bar2:
+        allnodes.add(node)
+    other_nodes=[]
+    common_node=None
+    for node in allnodes:
+        if node in bar1 and node in bar2:
+            common_node=node
+        else:
+            other_nodes.append(node)
+    if common_node:
+        return[common_node,other_nodes]
+    return False
+
+
+
+#input: bars and their corresponding nodes
+def eulerian_unfuck(bars,nodes,all_possible_bars):
+    barcount=collections.defaultdict()
+    euler_materializes_out_of_thin_air_with_steel_bars=[]
+
+    extra_possible_bars=[]
+    for bar in all_possible_bars:
+        if bar not in bars:
+            extra_possible_bars.append(bar)
+
+    for node in nodes:
+        barcount[node]=0
+        for bar in bars:
+            if node in bar:
+                barcount[node]+=1
+    fucked_nodes=0
+    for node in barcount:
+        if barcount[node]%2>0:
+            fucked_nodes+=1
+    print "Fucked nodes: ",fucked_nodes
+    for bar in all_possible_bars:
+        if bar not in bars:
+            nodes_in_distress=0
+            for node in bar:
+                if barcount[node]% 2 > 0:
+                    nodes_in_distress+=1
+            if nodes_in_distress==2:
+                euler_materializes_out_of_thin_air_with_steel_bars.append(bar)
+                for node in bar:
+                    barcount[node]+=1
+
+
+
+    extra_possible_bars=[]
+    for bar in all_possible_bars:
+        if bar not in bars and bar not in euler_materializes_out_of_thin_air_with_steel_bars:
+            extra_possible_bars.append(bar)
+
+    #experimental part...
+
+    for bar1 in extra_possible_bars:
+        for bar2 in extra_possible_bars:
+            useful_information=are_bars_adjacent(bar1,bar2)
+            if useful_information:
+                nodes_in_distress=0
+                for node in useful_information[1]:
+                    if barcount[node]% 2 > 0:
+                        nodes_in_distress+=1
+                if nodes_in_distress==2:
+                    euler_materializes_out_of_thin_air_with_steel_bars.append(bar1)
+                    euler_materializes_out_of_thin_air_with_steel_bars.append(bar2)
+                    for node in useful_information[1]:
+                        barcount[node]+=1
+
+    # remove_bars=[]
+    # for node1 in barcount:
+    #     if barcount[node1]% 2 > 0:
+    #         for node2 in barcount:
+    #             if barcount[node2]% 2 > 0:
+    #                 if set([node1,node2]) in bars:
+    #                     remove_bars.append(set([node1,node2]))
+    #                     barcount[node1]-=1
+    #                     barcount[node2]-=1
+
+
+
+   # for bar in remove_bars:
+   #     bars.remove(bar)
+    for bar in euler_materializes_out_of_thin_air_with_steel_bars:
+        bars.append(bar)
+
+    for node in nodes:
+        barcount[node]=0
+        for bar in bars:
+            if node in bar:
+                barcount[node]+=1
+
+    fucked_nodes=0
+    for node in barcount:
+        if barcount[node]%2>0:
+            fucked_nodes+=1
+    print "Post-Euler fucked nodes: ",fucked_nodes
+    return bars
+
+
+
 
 def write_files(filename_append,bars,nodes_xyz):
 
-
+    directorypath=modelinfo_output_directory+"/"+filename_append+"/"
+    if not os.path.exists(directorypath):
+        os.makedirs(directorypath)
     modelnodeinfofilename = modelinfo_output_directory+"/%s/Model_Node_Info.csv"%(filename_append)
     modelbarinfofilename = modelinfo_output_directory+"/%s/Model_Bar_Info.csv"%(filename_append)
     pixelmappingfilename = modelinfo_output_directory+"/%s/pixel_mapping.csv"%(filename_append)
 
     in_out_mid_bars,in_out_nodes = inner_outer_errthing()
     groundbars=get_ground_bars()
+    wiring_modules=get_modules_for_wiring()
+
+
+
+    with open(pixelmappingfilename,"wb") as f:
+        wrtr=csv.writer(f)
+        wrtr.writerow(["Pixel_i","Module1","Module2","Inner_Outer","Left_Right_Mid","Node1","Node2","X","Y","Z","Strip"])
+        pixel_i=0
+        bars_in_load_order=[]
+        for bar in bar_strip_numbers:
+            barset=set(bar[0].split('-'))
+            if barset in bars:
+                bars_in_load_order.append(barset)
+        for bar in bars:
+            if bar not in bars_in_load_order:
+                bars_in_load_order.append(bar)
+        for bar in bars_in_load_order:
+            barstr=bar_to_str(bar)
+            node_1=sorted(list(bar))[0]
+            node_2=sorted(list(bar))[1]
+            node_1_xyz = nodes_xyz[node_1]
+            node_2_xyz = nodes_xyz[node_2]                    
+            strip=9999 #set strip number to 9999 if not specified
+            if barstr in bar_strip_numbers_dict:
+                strip=bar_strip_numbers_dict[barstr]
+            module=1 #no moar modules but keeping this here in case we end up using them to divvy up where shit goes
+            if barstr in wiring_modules:
+                module=wiring_modules[barstr]
+            bar_len,num_pixels=get_bar_len_led_info(bar)
+            barlen_for_calc=xyz_dist(node_1_xyz,node_2_xyz)
+
+            inner_outer_mid=in_out_mid_bars[barstr]
+            leftrightmid=left_right_mid(node_1_xyz,node_2_xyz)
+
+            #3.0 inch space at the end of the bar where the bolt hole is minus 1.5 inches because of where the hole is. this is rough. might need to adjust.
+            dx_bar_end_space=(node_2_xyz[0]-node_1_xyz[0])/barlen_for_calc*1.5 
+            dy_bar_end_space=(node_2_xyz[1]-node_1_xyz[1])/barlen_for_calc*1.5 
+            dz_bar_end_space=(node_2_xyz[2]-node_1_xyz[2])/barlen_for_calc*1.5 
+            dx=(node_2_xyz[0]-node_1_xyz[0])/barlen_for_calc*led_spacing
+            dy=(node_2_xyz[1]-node_1_xyz[1])/barlen_for_calc*led_spacing
+            dz=(node_2_xyz[2]-node_1_xyz[2])/barlen_for_calc*led_spacing
+            pixel=[node_1_xyz[0]+dx_bar_end_space,node_1_xyz[1]+dy_bar_end_space,node_1_xyz[2]+dz_bar_end_space]
+            for pixl in range(0,num_pixels):
+                add_row=[pixel_i,module,module,inner_outer_mid,leftrightmid,node_1,node_2]+pixel+[strip]
+                strip_pixel=str(strip).zfill(5)+"-"+str(pixel_i).zfill(8)
+                pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
+                pixel_i+=1
+                wrtr.writerow(add_row)
+
+
 
     with open(modelnodeinfofilename,"wb") as f:
         wrtr=csv.writer(f)
@@ -209,9 +431,11 @@ def write_files(filename_append,bars,nodes_xyz):
     with open(modelbarinfofilename,"wb") as f:
         wrtr=csv.writer(f)
         wrtr.writerow(["Bar_name","Module","Min_X","Min_Y","Min_Z","Max_X","Max_Y","Max_Z","Nodes","Physical_Bars","Physical_Nodes","Adjacent_Nodes","Adjacent_Physical_Bars","Adjacent_Bars","Adjacent_Physical_Nodes","Ground","Inner_Outer","Left_Right_Mid"])
-        for bar in bars:
+        for bar in bars_in_load_order:
             barstr=bar_to_str(bar)
-            module="1" #for now. we'll see if I need to rewrite this
+            module=1
+            if barstr in wiring_modules:
+                module=wiring_modules[barstr]
 
             #get the min max xyz based on the nodes of the bar
             min_x=10000
@@ -270,41 +494,6 @@ def write_files(filename_append,bars,nodes_xyz):
 
 
 
-    with open(pixelmappingfilename,"wb") as f:
-        wrtr=csv.writer(f)
-        wrtr.writerow(["Pixel_i","Module1","Module2","Inner_Outer","Left_Right_Mid","Node1","Node2","X","Y","Z","Strip"])
-        pixel_i=0
-        for bar in bars:
-            barstr=bar_to_str(bar)
-            node_1=sorted(list(bar))[0]
-            node_2=sorted(list(bar))[1]
-            node_1_xyz = nodes_xyz[node_1]
-            node_2_xyz = nodes_xyz[node_2]                    
-            strip=9999 #set strip number to 9999 if not specified
-            module=1 #no moar modules but keeping this here in case we end up using them to divvy up where shit goes
-            #STRIP LOGIC GOES HERE LATER
-
-            bar_len,num_pixels=get_bar_len_led_info(bar)
-            barlen_for_calc=xyz_dist(node_1_xyz,node_2_xyz)
-
-            inner_outer_mid=in_out_mid_bars[barstr]
-            leftrightmid=left_right_mid(node_1_xyz,node_2_xyz)
-
-            #3.0 inch space at the end of the bar where the bolt hole is minus 1.5 inches because of where the hole is. this is rough. might need to adjust.
-            dx_bar_end_space=(node_2_xyz[0]-node_1_xyz[0])/barlen_for_calc*1.5 
-            dy_bar_end_space=(node_2_xyz[1]-node_1_xyz[1])/barlen_for_calc*1.5 
-            dz_bar_end_space=(node_2_xyz[2]-node_1_xyz[2])/barlen_for_calc*1.5 
-            dx=(node_2_xyz[0]-node_1_xyz[0])/barlen_for_calc*led_spacing
-            dy=(node_2_xyz[1]-node_1_xyz[1])/barlen_for_calc*led_spacing
-            dz=(node_2_xyz[2]-node_1_xyz[2])/barlen_for_calc*led_spacing
-            pixel=[node_1_xyz[0]+dx_bar_end_space,node_1_xyz[1]+dy_bar_end_space,node_1_xyz[2]+dz_bar_end_space]
-            for pixl in range(0,num_pixels):
-                add_row=[pixel_i,module,module,inner_outer_mid,leftrightmid,node_1,node_2]+pixel+[strip]
-                strip_pixel=str(strip).zfill(5)+"-"+str(pixel_i).zfill(8)
-                pixel=[pixel[0]+dx, pixel[1]+dy, pixel[2]+dz]
-                pixel_i+=1
-                wrtr.writerow(add_row)
-
     print "SUBSET NAME: ",filename_append
     print "BARS: ", len(bars)
     print "PIXELS: ", pixel_i
@@ -316,9 +505,19 @@ if __name__=="__main__":
 
     bar_subsets = []
 
-    filename_append = "Full_Brain"
-    active_bars = get_bars()
+    filename_append = "Full_Brain_DBL1"
+    all_bars = get_bars()
     active_nodes_xyz=get_node_xyz()
+    write_files(filename_append,all_bars,active_nodes_xyz)
+
+
+    filename_append = "Subset_Brain"
+    active_bars, active_nodes = get_subset_bars_and_nodes()
+    write_files(filename_append,active_bars,active_nodes_xyz)
+
+    filename_append = "Eulerian_unfuck"
+    active_bars, active_nodes = get_subset_bars_and_nodes()
+    active_bars=eulerian_unfuck(active_bars,active_nodes,all_bars)
     write_files(filename_append,active_bars,active_nodes_xyz)
         
 

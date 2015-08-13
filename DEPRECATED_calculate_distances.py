@@ -12,6 +12,19 @@ ground_nodes = ["WAX","AIM","LID","BOX","HUG","FLU","SIR","ONO","TAT","COP","NEW
 
 modelinfo_output_directory="mapping_datasets"
 
+
+
+bars_with_clipped_pixels = collections.defaultdict()
+with open("chopped_pixels.csv","rb") as f:
+    rdr=csv.reader(f)
+    for row in rdr:
+        nodes=row[:2]
+        clipped=int(row[2])
+        barname='-'.join(sorted(nodes))
+        bars_with_clipped_pixels[barname]=clipped
+
+
+
 def get_node_module_xyz():
     module_dict=collections.defaultdict()
     node_xyz=collections.defaultdict()
@@ -287,8 +300,14 @@ def get_bar_len_led_info(bar):
         for row in rdr:
             barnamset=set(row[0].split('-'))
             if barnamset==bar:
+                barnamstr='-'.join(sorted(row[0].split('-')))
                 bar_len=float(row[1])
                 num_leds=int(row[3])
+                if barnamstr in bars_with_clipped_pixels:
+                    print num_leds
+                    num_leds = num_leds-bars_with_clipped_pixels[barnamstr]
+                    print num_leds
+                    print barnamstr
                 return bar_len,num_leds
     return False
 
@@ -494,14 +513,20 @@ def make_polygonal_subset(polygons):
             new_bars_added+=1
         iterations=0
         how_many_bars_limit = (gonalness+1)/2
+        if how_many_bars_limit==3:
+            how_many_bars_limit=4
+        if how_many_bars_limit==1:
+            how_many_bars_limit=2
+        if how_many_bars_limit==5:
+            how_many_bars_limit=6
 
         #randomly reduce the # bars for a polygon to reduce overal polygon count
-        if how_many_bars_limit > 2:
-            how_many_bars_limit-=1
+       # if how_many_bars_limit > 2:
+       #     how_many_bars_limit-=1
 
         while new_bars_added < how_many_bars_limit:
             iterations+=1
-            position_in_polygon+=3
+            position_in_polygon+=2
             position_in_polygon=position_in_polygon % len(polygon_as_ordered_list)
             trybar=set([maxedoutnodes[0], polygon_as_ordered_list[position_in_polygon]])
             if trybar in new_potential_bars:
@@ -595,7 +620,8 @@ if __name__=="__main__":
 
 
 
-    filename_append = "Outer_plus_algorithmic_inner"
+
+    filename_append = "Experimental_4bar"
     polygons=load_polygons() #or to make from scratch, find_polygons_in_outer_shell(). Takes a little while though.
     selected_mid_bars=make_polygonal_subset(polygons)
     ground_bars,ground_bars_plus=get_ground_bars()
@@ -606,6 +632,20 @@ if __name__=="__main__":
             active_bars.append(bar)
     outer_brain_subset=BarSubset(active_bars,filename_append)
     bar_subsets.append(outer_brain_subset)
+
+
+
+#    filename_append = "Outer_plus_algorithmic_inner"
+#    polygons=load_polygons() #or to make from scratch, find_polygons_in_outer_shell(). Takes a little while though.
+#    selected_mid_bars=make_polygonal_subset(polygons)
+#    ground_bars,ground_bars_plus=get_ground_bars()
+#    active_bars=subset_shells("outer_bars.csv")+selected_mid_bars
+#    #don't want to add bars that are already there
+#    for bar in ground_bars_plus:
+#        if bar not in active_bars:
+#            active_bars.append(bar)
+#    outer_brain_subset=BarSubset(active_bars,filename_append)
+#    bar_subsets.append(outer_brain_subset)
 
 
 
