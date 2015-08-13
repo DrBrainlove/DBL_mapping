@@ -377,9 +377,10 @@ def write_files(filename_append,bars,nodes_xyz):
             leftrightmid=left_right_mid(node_1_xyz,node_2_xyz)
 
             #3.0 inch space at the end of the bar where the bolt hole is minus 1.5 inches because of where the hole is. this is rough. might need to adjust.
-            dx_bar_end_space=(node_2_xyz[0]-node_1_xyz[0])/barlen_for_calc*1.5 
-            dy_bar_end_space=(node_2_xyz[1]-node_1_xyz[1])/barlen_for_calc*1.5 
-            dz_bar_end_space=(node_2_xyz[2]-node_1_xyz[2])/barlen_for_calc*1.5 
+          
+            dx_bar_end_space=(node_2_xyz[0]-node_1_xyz[0])/barlen_for_calc*(barlen_for_calc-num_pixels*led_spacing)*1/2
+            dy_bar_end_space=(node_2_xyz[1]-node_1_xyz[1])/barlen_for_calc*(barlen_for_calc-num_pixels*led_spacing)*1/2
+            dz_bar_end_space=(node_2_xyz[2]-node_1_xyz[2])/barlen_for_calc*(barlen_for_calc-num_pixels*led_spacing)*1/2 
             dx=(node_2_xyz[0]-node_1_xyz[0])/barlen_for_calc*led_spacing
             dy=(node_2_xyz[1]-node_1_xyz[1])/barlen_for_calc*led_spacing
             dz=(node_2_xyz[2]-node_1_xyz[2])/barlen_for_calc*led_spacing
@@ -515,7 +516,7 @@ if __name__=="__main__":
     active_bars, active_nodes = get_subset_bars_and_nodes()
     write_files(filename_append,active_bars,active_nodes_xyz)
 
-    filename_append = "Eulerian_unfuck"
+    filename_append = "Playa_Brain" #"Eulerian_unfuck"
     active_bars, active_nodes = get_subset_bars_and_nodes()
     active_bars=eulerian_unfuck(active_bars,active_nodes,all_bars)
     write_files(filename_append,active_bars,active_nodes_xyz)
