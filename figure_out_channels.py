@@ -4,7 +4,7 @@ import numpy as np
 
 
 MAX_CHANNELS_TOTAL=48
-MAX_LEDS_PER_CHANNEL=480
+MAX_LEDS_PER_CHANNEL=512
 NUM_CONTROLLERS_TOTAL=24 #28 but trying to get away with having four spare
 CHANNELS_PER_RECEIVER=2
 
@@ -211,14 +211,14 @@ def form_new_modules(bars):
 
 
 
-    for bar in modules[3]:
+    """for bar in modules[3]:
         barset=bar_to_set(bar)
         for node in barset:
             for bar2 in modules[4]:
                 if node in bar2:
                     print node
                     if node in ground_nodes:
-                        print "not",node
+                        print "not",node"""
 
   
 
@@ -341,7 +341,7 @@ for module in range(1,9):
 
 
 
-    for x in range(0,1000000):
+    for x in range(0,500000):
         if x % 1000==0:
             print x,datetime.datetime.now()
 
@@ -352,8 +352,8 @@ for module in range(1,9):
         bars_remaining=copy.deepcopy(bars)
         jumps=0
         receiver_nodes=set()
+        startnode=random.sample(set(nodes),1)[0]
         for receiver in range(0,3):
-            startnode=random.sample(set(nodes),1)[0]
 
             receiver_nodes.add(startnode)
             alternative_startnodes=get_adjacent_nodes(startnode,bars_remaining)
@@ -392,7 +392,7 @@ for module in range(1,9):
                             strip_leds.append(leds_used)
                             too_short=False
                         else:
-                            this_mapping.append([node_channel_name,nextbarstr])
+                            this_mapping.append([node_channel_name,startnode,nextbarstr])
                             bars_remaining.remove(next_bar)
                     else:
                         if receiver==2:
@@ -415,9 +415,9 @@ for module in range(1,9):
                                 strip_leds.append(leds_used)
                                 too_short=False
                             else:
-                                this_mapping.append([node_channel_name,jumpstr])
+                                this_mapping.append([node_channel_name,startnode,jumpstr])
                                 jumps+=1
-                                this_mapping.append([node_channel_name,nextbarstr])
+                                this_mapping.append([node_channel_name,startnode,nextbarstr])
                                 bars_remaining.remove(next_bar)
                         else:
                             end_of_strip=True
@@ -448,6 +448,6 @@ for module in range(1,9):
 
             dumptojson=[module,len(bars_remaining_serializable),jumps,groundnode_utilization,distinct_receivernodes,num_alternative_startnodes,leds_min,leds_max,leds_avg,leds_variance,bars_remaining_serializable,this_mapping]
             nowstamp=datetime.datetime.now().strftime("%H%M%S")
-            json.dump(dumptojson,open("possible_mappings/"+nowstamp+"_M"+str(module)+"_G"+str(groundnode_utilization)+"_R"+str(distinct_receivernodes)+"_A"+str(num_alternative_startnodes)+"_"+mapping_name+".json","w"))
+            json.dump(dumptojson,open("possible_mappings/r2_"+nowstamp+"_M"+str(module)+"_G"+str(groundnode_utilization)+"_R"+str(distinct_receivernodes)+"_A"+str(num_alternative_startnodes)+"_"+mapping_name+".json","w"))
 
 

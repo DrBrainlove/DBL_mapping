@@ -1,4 +1,4 @@
-import os,csv, math, collections, random, time,datetime, traceback
+import os,csv, math, collections, random, time,datetime, traceback, shutil
 import pickle
 
 
@@ -346,6 +346,10 @@ def write_files(filename_append,bars,nodes_xyz):
 
 
 
+
+
+
+
     with open(pixelmappingfilename,"wb") as f:
         wrtr=csv.writer(f)
         wrtr.writerow(["Pixel_i","Module1","Module2","Inner_Outer","Left_Right_Mid","Node1","Node2","X","Y","Z","Strip"])
@@ -520,8 +524,18 @@ if __name__=="__main__":
     active_bars, active_nodes = get_subset_bars_and_nodes()
     active_bars=eulerian_unfuck(active_bars,active_nodes,all_bars)
     write_files(filename_append,active_bars,active_nodes_xyz)
-        
 
+    #srsly wtf shutil this should have been one line of code
+    #i am angered
+    #nothing will actually happen
+    #okay fine I'll write the csv and shut up
+    #edit: whoops missed a thing god damn it
+    with open('Node_to_node_in_strip_pixel_order.csv','rb') as f:
+        with open('mapping_datasets/Playa_Brain/Node_to_node_in_strip_pixel_order.csv','wb') as fout:
+            rdr=csv.reader(f)
+            wrtr=csv.writer(fout)
+            for row in rdr:
+                wrtr.writerow(row)
 
 
     
