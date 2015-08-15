@@ -43,14 +43,14 @@ def make_nodes_in_order(firstnode,bar):
 	return (node1,node2)
 
 
-module_jsons=	["233504_M1_G2_R3_A2_mapping_78730.json",
-				"233632_M2_G1_R3_A1_mapping_58403.json",
-				"223751_M3_G1_R3_A2_mapping_22996.json",
-				"233917_M4_G2_R3_A1_mapping_12429.json",
-				"224141_M5_G2_R3_A2_mapping_40081.json",
-				"234233_M6_G2_R3_A3_mapping_8993.json",
-				"234451_M7_G0_R2_A2_mapping_36612.json",
-				"234708_M8_G0_R3_A2_mapping_52382.json"]
+module_jsons=	["r4_184635_M1_G2_R2_A2_mapping_313688.json",
+				"r4_185625_M2_G0_R1_A2_mapping_368412.json",
+				"r4_190403_M3_G0_R2_A2_mapping_305101.json",
+				"r4_191013_M4_G1_R1_A1_mapping_152409.json",
+				"r4_192113_M5_G1_R2_A1_mapping_301586.json",
+				"r4_193223_M6_G1_R1_A1_mapping_445551.json",
+				"r4_194128_M7_G0_R1_A0_mapping_407942.json",
+				"r4_194610_M8_G0_R1_A1_mapping_157810.json"]
 
 
 
@@ -61,7 +61,10 @@ outputnodes=[]
 for modu,mj in enumerate(module_jsons):
 	modnumber=modu+1
 	modulething=json.load(open("possible_mappings/"+mj,"r"))
-	actuallist=modulething[11]
+	origin_node=modulething[6]
+	print modnumber,origin_node
+	othernodes=modulething[7]
+	actuallist=modulething[13]
 	prevchannel=2
 	startnode,receiver,channel=actuallist[0][0].split('_')
 	firstnode=startnode
@@ -69,14 +72,15 @@ for modu,mj in enumerate(module_jsons):
 		startnode,receiver,channel=row[0].split('_')
 		receiver=int(receiver)
 		channel=int(channel)
-		barname=row[1]
+		barname=row[2]
 		barnameset=bar_to_set(barname)
 		if channel!=prevchannel:
 			strip+=1
-			first_node_in_strip=get_firstnode(barname,actuallist[rnum+1][1])
+			first_node_in_strip=get_firstnode(barname,actuallist[rnum+1][2])
 			firstnode=first_node_in_strip
+			print modnumber,"O",firstnode
 			outputnodes.append([first_node_in_strip,strip,barname,make_nodes_in_order(first_node_in_strip,barname)])
-			print strip,receiver,prevchannel,leds_in_strip
+			#print strip,receiver,prevchannel,leds_in_strip
 			leds_in_strip=0
 		else:
 			outputnodes.append([firstnode,strip,barname,make_nodes_in_order(firstnode,barname)])

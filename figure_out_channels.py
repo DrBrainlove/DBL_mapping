@@ -204,6 +204,10 @@ def form_new_modules(bars):
     modules=move_bar_between_modules(modules,"ETA-PAY",4,3)
     modules=move_bar_between_modules(modules,"LUG-TUX",4,3)
     modules=move_bar_between_modules(modules,"PAY-TUX",4,3)
+    modules=move_bar_between_modules(modules,"PAY-WIN",4,3)
+    modules=move_bar_between_modules(modules,"BAH-WIN",4,3)
+    modules=move_bar_between_modules(modules,"BAH-BAM",4,3)
+    modules=move_bar_between_modules(modules,"GUN-OFF",5,4)
 
  #   modules=move_bar_between_modules(modules,"BOA-SHY",2,5)
  #   modules=move_bar_between_modules(modules,"BOA-HOW",2,5)
@@ -211,14 +215,14 @@ def form_new_modules(bars):
 
 
 
-    """for bar in modules[3]:
+    for bar in modules[3]:
         barset=bar_to_set(bar)
         for node in barset:
             for bar2 in modules[4]:
                 if node in bar2:
-                    print node
+                   # print node
                     if node in ground_nodes:
-                        print "not",node"""
+                        print node
 
   
 
@@ -353,16 +357,19 @@ for module in range(1,9):
         jumps=0
         receiver_nodes=set()
         startnode=random.sample(set(nodes),1)[0]
+        module_origin_startnode=startnode
+        alternative_startnodes=[]
         for receiver in range(0,3):
 
             receiver_nodes.add(startnode)
-            alternative_startnodes=get_adjacent_nodes(startnode,bars_remaining)
+            alternative_startnodes=get_adjacent_nodes(module_origin_startnode,bars_remaining)
             for node_channel in range(0,2):#range(0,RECEIVERS_PER_BASE_NODE*CHANNELS_PER_RECEIVER):
                 use_alternative_node=random.randint(0,1)
                 if use_alternative_node:
                     try:
                         startnode=random.choice(alternative_startnodes)
                         num_alternative_startnodes+=1
+                        alternative_startnodes.append(startnode)
                     except:
                         pass
                 node_channel_name=startnode+"_"+str(receiver)+"_"+str(node_channel)
@@ -415,9 +422,9 @@ for module in range(1,9):
                                 strip_leds.append(leds_used)
                                 too_short=False
                             else:
-                                this_mapping.append([node_channel_name,startnode,jumpstr])
+                                this_mapping.append([node_channel_name,module_origin_startnode,startnode,jumpstr])
                                 jumps+=1
-                                this_mapping.append([node_channel_name,startnode,nextbarstr])
+                                this_mapping.append([node_channel_name,module_origin_startnode,startnode,nextbarstr])
                                 bars_remaining.remove(next_bar)
                         else:
                             end_of_strip=True
@@ -446,8 +453,8 @@ for module in range(1,9):
             for bar in bars_remaining:
                 bars_remaining_serializable.append(list(bar))
 
-            dumptojson=[module,len(bars_remaining_serializable),jumps,groundnode_utilization,distinct_receivernodes,num_alternative_startnodes,leds_min,leds_max,leds_avg,leds_variance,bars_remaining_serializable,this_mapping]
+            dumptojson=[module,len(bars_remaining_serializable),jumps,groundnode_utilization,distinct_receivernodes,num_alternative_startnodes,module_origin_startnode,alternative_startnodes,leds_min,leds_max,leds_avg,leds_variance,bars_remaining_serializable,this_mapping]
             nowstamp=datetime.datetime.now().strftime("%H%M%S")
-            json.dump(dumptojson,open("possible_mappings/r2_"+nowstamp+"_M"+str(module)+"_G"+str(groundnode_utilization)+"_R"+str(distinct_receivernodes)+"_A"+str(num_alternative_startnodes)+"_"+mapping_name+".json","w"))
+            json.dump(dumptojson,open("possible_mappings/r4_"+nowstamp+"_M"+str(module)+"_G"+str(groundnode_utilization)+"_R"+str(distinct_receivernodes)+"_A"+str(num_alternative_startnodes)+"_"+mapping_name+".json","w"))
 
 
