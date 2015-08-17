@@ -4,7 +4,7 @@ import numpy as np
 
 
 MAX_CHANNELS_TOTAL=48
-MAX_LEDS_PER_CHANNEL=512
+MAX_LEDS_PER_CHANNEL=452
 NUM_CONTROLLERS_TOTAL=24 #28 but trying to get away with having four spare
 CHANNELS_PER_RECEIVER=2
 
@@ -356,11 +356,10 @@ for module in range(1,9):
         bars_remaining=copy.deepcopy(bars)
         jumps=0
         receiver_nodes=set()
-        startnode=random.sample(set(nodes),1)[0]
-        module_origin_startnode=startnode
+        module_origin_startnode="NONE"
         alternative_startnodes=[]
         for receiver in range(0,3):
-
+            startnode=random.sample(set(nodes),1)[0]
             receiver_nodes.add(startnode)
             alternative_startnodes=get_adjacent_nodes(module_origin_startnode,bars_remaining)
             for node_channel in range(0,2):#range(0,RECEIVERS_PER_BASE_NODE*CHANNELS_PER_RECEIVER):
@@ -455,6 +454,6 @@ for module in range(1,9):
 
             dumptojson=[module,len(bars_remaining_serializable),jumps,groundnode_utilization,distinct_receivernodes,num_alternative_startnodes,module_origin_startnode,alternative_startnodes,leds_min,leds_max,leds_avg,leds_variance,bars_remaining_serializable,this_mapping]
             nowstamp=datetime.datetime.now().strftime("%H%M%S")
-            json.dump(dumptojson,open("possible_mappings/r4_"+nowstamp+"_M"+str(module)+"_G"+str(groundnode_utilization)+"_R"+str(distinct_receivernodes)+"_A"+str(num_alternative_startnodes)+"_"+mapping_name+".json","w"))
+            json.dump(dumptojson,open("possible_mappings/r5_452_"+nowstamp+"_M"+str(module)+"_G"+str(groundnode_utilization)+"_R"+str(distinct_receivernodes)+"_A"+str(num_alternative_startnodes)+"_"+mapping_name+".json","w"))
 
 
