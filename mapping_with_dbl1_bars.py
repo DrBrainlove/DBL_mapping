@@ -196,8 +196,8 @@ def get_bar_len_led_info(bar):
             if barnamset==bar:
                 bar_len=float(row[1])
                 num_leds=int(row[3])
-                if barnamstr in bars_with_clipped_pixels:
-                    num_leds = num_leds-bars_with_clipped_pixels[barnamstr]
+        #        if barnamstr in bars_with_clipped_pixels:
+        #            num_leds = num_leds-bars_with_clipped_pixels[barnamstr]
                 return bar_len,num_leds
     return False
 

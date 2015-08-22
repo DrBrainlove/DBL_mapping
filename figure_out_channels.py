@@ -101,7 +101,7 @@ def get_subset_bars_and_nodes():
     subset_bars=[]
     subset_nodes=[]
     #with open("400m_subset_Model_Bar_Info.csv","rb") as f:
-    with open("mapping_datasets/Eulerian_unfuck/Model_Bar_Info.csv","rb") as f:
+    with open("mapping_datasets/Playa_Brain/Model_Bar_Info.csv","rb") as f:
         rdr=csv.reader(f)
         rdr.next()
         for row in rdr:
