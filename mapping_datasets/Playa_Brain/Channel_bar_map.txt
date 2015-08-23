@@ -1,0 +1,97 @@
+module 1, channel 0:  COP[54:pnk] -WOW[41:blu] -WIG[45:red] -KEY[41:blu] -FIG[36:yel] -NOR[50:grn] -KIT[59:pur] -ONO[50:grn] -BAR[41:blu] -SIR[45:red] -FLU[36:yel] -BAR   [length: 11.60 m (38.06 ft)]
+
+module 1, channel 1:  COP[54:pnk] -ELK[54:pnk] -TAT[45:red] -ONO[59:pur] -USE[50:grn] -NEW[36:yel] -COP[32:blk] -USE[36:yel] -ELK[86:None] -SIR[41:blu] -ONO   [length: 11.22 m (36.80 ft)]
+
+module 1, channel 2:  GET[41:blu] -FOR[36:yel] -RUG[36:yel] -ALL[45:red] -SAD[45:red] -HIP[41:blu] -GET[41:blu] -OAK[41:blu] -FOR[41:blu] -HIP[41:blu] -NEW[41:blu] -GET[59:pur] -CAB   [length: 12.07 m (39.59 ft)]
+
+module 1, channel 3:  GET[73:yelstr] -DAD[41:blu] -FOR[45:red] -EGG[41:blu] -ALL[32:blk] -PRO[41:blu] -GOO[41:blu] -SAD[41:blu] -WOW[41:blu] -NEW   [length: 9.30 m (30.51 ft)]
+
+module 1, channel 4:  GET[64:ltgrn] -COP[64:ltgrn] -TAT[59:pur] -SIR[54:pnk] -AGE[50:grn] -KIT[36:yel] -ELK[45:red] -WIG[45:red] -USE[54:pnk] -TAT   [length: 10.55 m (34.61 ft)]
+
+module 1, channel 5:  GET[59:pur] -RUG[36:yel] -SAD[32:blk] -KEY[36:yel] -NOR[36:yel] -WIG[50:grn] -KIT   [length: 5.95 m (19.52 ft)]
+
+module 2, channel 6:  PAW[50:grn] -VAN[41:blu] -BOX[41:blu] -HUG[68:pnkstr] -LID[68:pnkstr] -GYM[41:blu] -BOX[32:blk] -EGO[41:blu] -GYM[54:pnk] -OAR[50:grn] -ZIG   [length: 11.10 m (36.42 ft)]
+
+module 2, channel 7:  PAW[41:blu] -ZIG[41:blu] -TAX[45:red] -WIZ[41:blu] -GIN[36:yel] -SAY[41:blu] -ZIG[32:blk] -DAY[32:blk] -SAY[50:grn] -ICE[36:yel] -LAX[41:blu] -ASH[54:pnk] -HAM   [length: 11.77 m (38.60 ft)]
+
+module 2, channel 8:  PAW[45:red] -SAY[54:pnk] -WIZ[41:blu] -ZZZ[36:yel] -GIN[41:blu] -ICE[50:grn] -HAM[36:yel] -LAX[36:yel] -MAD[36:yel] -ICE[36:yel] -BED[54:pnk] -PAW   [length: 11.05 m (36.25 ft)]
+
+module 2, channel 9:  PAW[54:pnk] -GYM[59:pur] -HUG[36:yel] -VAN[41:blu] -FLU[41:blu] -HUG[54:pnk] -CUP[64:ltgrn] -SIR[73:yelstr] -HUG   [length: 9.43 m (30.95 ft)]
+
+module 2, channel 10:  CUP[68:pnkstr] -GYM[41:blu] -VAN[36:yel] -CUP[41:blu] -BAR[36:yel] -DOG[36:yel] -AGE[36:yel] -BAR   [length: 7.00 m (22.97 ft)]
+
+module 2, channel 11:  CUP[36:yel] -PAW[50:grn] -DOG[32:blk] -CHI[36:yel] -MAD[36:yel] -BED[36:yel] -CHI[41:blu] -KIT[36:yel] -COY[41:blu] -MAD[45:red] -ART[59:pur] -KIT   [length: 10.77 m (35.32 ft)]
+
+module 3, channel 12:  SIP[59:pur] -RUM[50:grn] -SHY[50:grn] -BOA[36:yel] -HOW[45:red] -SHY[50:grn] -INK[41:blu] -GUT[59:pur] -RUM[73:yelstr] -OIL[41:blu] -ALA   [length: 11.40 m (37.40 ft)]
+
+module 3, channel 13:  HEX[41:blu] -MAY[36:yel] -RUM[41:blu] -INK[45:red] -OIL[36:yel] -DRY[36:yel] -REF[59:pur] -HOW   [length: 7.00 m (22.97 ft)]
+
+module 3, channel 14:  HEX[41:blu] -SIP[54:pnk] -GUT[64:ltgrn] -WAX[64:ltgrn] -MOM[36:yel] -EGO[41:blu] -LID[41:blu] -BOX   [length: 7.78 m (25.54 ft)]
+
+module 3, channel 15:  HEX[50:grn] -MIX[45:red] -AGO[27:None] -ALA[32:blk] -INK[36:yel] -MAY[36:yel] -SIP[68:pnkstr] -WAX[54:pnk] -MIX[50:grn] -AIM[41:blu] -LID[68:pnkstr] -WAX   [length: 11.75 m (38.55 ft)]
+
+module 3, channel 16:  HEX[45:red] -WAX[41:blu] -AIM[32:blk] -EGO[54:pnk] -OAR[64:ltgrn] -FLY[36:yel] -TAX[50:grn] -AGO[41:blu] -OAR[54:pnk] -MIX[36:yel] -MOM[59:pur] -LID   [length: 11.83 m (38.82 ft)]
+
+module 3, channel 17:  HEX[36:yel] -GUT[36:yel] -MIX[50:grn] -ALA[45:red] -FLY[50:grn] -WIZ[41:blu] -VOW[59:pur] -FLY[50:grn] -DRY[59:pur] -SHY   [length: 9.80 m (32.15 ft)]
+
+module 4, channel 18:  YAY[64:ltgrn] -TAR[41:blu] -WHY[36:yel] -LUG[41:blu] -TUX[36:yel] -PAY[41:blu] -WIN[41:blu] -BAM[45:red] -BAH[32:blk] -WIN[41:blu] -HAY[50:grn] -SAW   [length: 11.10 m (36.42 ft)]
+
+module 4, channel 19:  YAY[64:ltgrn] -CAB[36:yel] -OAK[32:blk] -ROB[41:blu] -DAD[73:yelstr] -EAR[41:blu] -PHI[41:blu] -GEL[41:blu] -MOO[41:blu] -DAD[64:ltgrn] -CAB[36:yel] -ROB   [length: 11.80 m (38.71 ft)]
+
+module 4, channel 20:  YAY[45:red] -HAY[41:blu] -BAM[73:yelstr] -YAY[54:pnk] -JAR[36:yel] -WIN[41:blu] -ETA[59:pur] -JAR[36:yel] -WHY[36:yel] -KEG[41:blu] -COW[45:red] -ODD   [length: 11.75 m (38.55 ft)]
+
+module 4, channel 21:  YAY[45:red] -AMP[45:red] -ROB[36:yel] -SEX[36:yel] -PHI[41:blu] -TAR[36:yel] -WAS[32:blk] -PHI[54:pnk] -SAW[50:grn] -SEX[36:yel] -GEL[50:grn] -ROB   [length: 10.98 m (36.03 ft)]
+
+module 4, channel 22:  SEX[54:pnk] -CAB[36:yel] -AMP[45:red] -SAW[45:red] -WHY[36:yel] -PAY[41:blu] -ETA[64:ltgrn] -LUG[36:yel] -ODD[36:yel] -KEG[32:blk] -WAS   [length: 10.08 m (33.08 ft)]
+
+module 4, channel 23:  SEX[73:yelstr] -YAY[41:blu] -SAW[45:red] -JAR[54:pnk] -BAM   [length: 4.75 m (15.58 ft)]
+
+module 5, channel 24:  CIS[36:yel] -BOY[41:blu] -FOX[36:yel] -TUX[36:yel] -GAS[36:yel] -FIX[41:blu] -AIR[36:yel] -ODD[41:blu] -GAS[32:blk] -EYE[36:yel] -POP[41:blu] -ACE[41:blu] -BRO   [length: 11.15 m (36.58 ft)]
+
+module 5, channel 25:  CIS[68:pnkstr] -OFF[59:pur] -TAG[41:blu] -TUB[41:blu] -SKY[36:yel] -DUI[36:yel] -DIG[41:blu] -HIT[41:blu] -SUN[36:yel] -SKY[32:blk] -FOX[41:blu] -TAG[36:yel] -ORC   [length: 12.07 m (39.59 ft)]
+
+module 5, channel 26:  CIS[41:blu] -ORC[41:blu] -OFF[54:pnk] -GUN[59:pur] -DUI[36:yel] -SUN[36:yel] -ACE   [length: 6.25 m (20.51 ft)]
+
+module 5, channel 27:  BAH[41:blu] -CIS[59:pur] -ETA[68:pnkstr] -BAM[68:pnkstr] -CIS   [length: 5.13 m (16.84 ft)]
+
+module 5, channel 28:  BAH[41:blu] -BOY[41:blu] -ORC[41:blu] -ASK[41:blu] -TAG[64:ltgrn] -IVY[41:blu] -SUN[36:yel] -EYE[41:blu] -FIX[41:blu] -POP   [length: 9.15 m (30.02 ft)]
+
+module 5, channel 29:  BAH[36:yel] -ETA[41:blu] -FOX[41:blu] -IVY[41:blu] -GAS   [length: 3.85 m (12.63 ft)]
+
+module 6, channel 30:  NIX[59:pur] -PIE[41:blu] -GAL[32:blk] -WAR[32:blk] -HOW[59:pur] -RUM[50:grn] -PIE[64:ltgrn] -ELF[41:blu] -WAR   [length: 8.70 m (28.54 ft)]
+
+module 6, channel 31:  NIX[73:yelstr] -WHO[73:yelstr] -OFF[36:yel] -ASK[41:blu] -GUN[68:pnkstr] -WHO[45:red] -FRO[36:yel] -RAW[41:blu] -JOY[41:blu] -NOM[41:blu] -BRO   [length: 11.25 m (36.91 ft)]
+
+module 6, channel 32:  NIX[45:red] -LEG[41:blu] -WHO[41:blu] -RAW[45:red] -LEG[41:blu] -OVA[41:blu] -SPY[45:red] -BIO[41:blu] -NOM[36:yel] -DIG[36:yel] -JOY[41:blu] -BIO[41:blu] -ARM   [length: 11.83 m (38.82 ft)]
+
+module 6, channel 33:  NIX[77:None] -SPY[36:yel] -RAW[41:blu] -GUN[41:blu] -DIG[36:yel] -TUB[32:blk] -ASK[41:blu] -FRO   [length: 7.17 m (23.51 ft)]
+
+module 6, channel 34:  NIX[41:blu] -OVA[41:blu] -RAD[41:blu] -ELF[36:yel] -BIO[36:yel] -RAD[32:blk] -GAL[36:yel] -ELF[41:blu] -DUB[36:yel] -ARM[41:blu] -BRO[32:blk] -HIT[41:blu] -NOM[36:yel] -ARM   [length: 12.07 m (39.59 ft)]
+
+module 6, channel 35:  OVA[36:yel] -PIE[54:pnk] -HOW   [length: 2.10 m (6.89 ft)]
+
+module 7, channel 36:  LAB[32:blk] -YAK[41:blu] -PRO[41:blu] -HOT[45:red] -LIE[41:blu] -ZOO[41:blu] -COW[41:blu] -AIR[41:blu] -FAX[36:yel] -ZOO[41:blu] -EAR[41:blu] -MOO[41:blu] -JAM   [length: 11.63 m (38.17 ft)]
+
+module 7, channel 37:  LAB[36:yel] -TAU[41:blu] -TRY[36:yel] -DUH[36:yel] -ACT[36:yel] -LAM[36:yel] -ASH[32:blk] -ACT[59:pur] -BUG[45:red] -ASH[50:grn] -ART[54:pnk] -FIG[36:yel] -YAK   [length: 11.88 m (38.99 ft)]
+
+module 7, channel 38:  LAB[36:yel] -ZAP[50:grn] -OLD[50:grn] -HOT[36:yel] -JAM[41:blu] -ZOO[41:blu] -WAS[41:blu] -COW[36:yel] -FAX[45:red] -LIE[45:red] -EVE[54:pnk] -IRE   [length: 11.22 m (36.80 ft)]
+
+module 7, channel 39:  LAB[41:blu] -BUG[45:red] -FIG[41:blu] -GOO[59:pur] -ZAP[36:yel] -PRO[41:blu] -PIG[41:blu] -MOO[41:blu] -EGG[41:blu] -PIG[41:blu] -JAM   [length: 10.12 m (33.19 ft)]
+
+module 7, channel 40:  LAB[32:blk] -LAM[36:yel] -TRY[32:blk] -FOG[36:yel] -LAW[41:blu] -RIB[32:blk] -FOG[54:pnk] -OLD[36:yel] -TAU[41:blu] -FOG[45:red] -SOY   [length: 9.42 m (30.89 ft)]
+
+module 7, channel 41:  LAB[54:pnk] -OLD[50:grn] -EVE[32:blk] -LAW[50:grn] -IRE[36:yel] -GIG[41:blu] -FAX[32:blk] -EVE[41:blu] -GIG[36:yel] -AIR[36:yel] -MAC[45:red] -IRE   [length: 10.85 m (35.60 ft)]
+
+module 8, channel 42:  JUG[45:red] -NIL[50:grn] -EON[50:grn] -POP[36:yel] -YES[41:blu] -MAC[32:blk] -POP   [length: 6.03 m (19.79 ft)]
+
+module 8, channel 43:  JUG[50:grn] -SOY[36:yel] -DUH[41:blu] -HAM[50:grn] -ZZZ[36:yel] -FAN[32:blk] -MOP[41:blu] -PLY[45:red] -FAN[36:yel] -FUN[45:red] -PLY[45:red] -NAY[45:red] -BOA   [length: 11.97 m (39.26 ft)]
+
+module 8, channel 44:  JUG[50:grn] -RIB[45:red] -IRE[36:yel] -ERA[36:yel] -JUG[50:grn] -MOP[36:yel] -DUH[41:blu] -NAN[36:yel] -HAM   [length: 7.90 m (25.92 ft)]
+
+module 8, channel 45:  JUG[41:blu] -PLY[41:blu] -JOB[32:blk] -NAY[36:yel] -FUN[41:blu] -DRY[41:blu] -VOW[41:blu] -FAN[41:blu] -NAN[59:pur] -SOY   [length: 8.92 m (29.25 ft)]
+
+module 8, channel 46:  AHI[45:red] -EON[50:grn] -TOY[36:yel] -NIL[36:yel] -AHI[50:grn] -JUG[50:grn] -JOB[41:blu] -TOY[36:yel] -ADO[41:blu] -NAY[41:blu] -REF[41:blu] -BOA[36:yel] -WAR   [length: 11.98 m (39.32 ft)]
+
+module 8, channel 47:  AHI[45:red] -IRE[54:pnk] -YES[36:yel] -EON[50:grn] -BRO[36:yel] -WET[41:blu] -TOY[36:yel] -DUB[36:yel] -WAR[41:blu] -ADO[41:blu] -DUB[36:yel] -WET[59:pur] -ACE   [length: 12.12 m (39.75 ft)]
+
+total strip length: 1530.79
