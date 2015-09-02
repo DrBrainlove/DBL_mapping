@@ -6,6 +6,8 @@ ground_nodes = ["WAX","AIM","LID","BOX","HUG","FLU","SIR","ONO","TAT","COP","NEW
 
 modelinfo_output_directory="mapping_datasets"
 
+removed_bars=[set(["NOR","WIG"]),set(["COY","KIT"]),set(["GIN","SAY"]),set(["ALA","OIL"])]
+
 led_spacing=0.656168 #inches. Le sigh. 
 
 bar_strip_numbers=[]
@@ -357,10 +359,10 @@ def write_files(filename_append,bars,nodes_xyz):
         bars_in_load_order=[]
         for bar in bar_strip_numbers:
             barset=set(bar[0].split('-'))
-            if barset in bars:
+            if barset in bars and barset not in removed_bars:
                 bars_in_load_order.append(barset)
         for bar in bars:
-            if bar not in bars_in_load_order:
+            if bar not in bars_in_load_order and bar not in removed_bars:
                 bars_in_load_order.append(bar)
         for bar in bars_in_load_order:
             barstr=bar_to_str(bar)
@@ -370,7 +372,10 @@ def write_files(filename_append,bars,nodes_xyz):
             node_2_xyz = nodes_xyz[node_2]                    
             strip=9999 #set strip number to 9999 if not specified
             if barstr in bar_strip_numbers_dict:
-                strip=bar_strip_numbers_dict[barstr]
+                strip=int(bar_strip_numbers_dict[barstr])
+                if strip>=4:
+                    strip=strip+3
+                strip=str(strip)
             module=1 #no moar modules but keeping this here in case we end up using them to divvy up where shit goes
             if barstr in wiring_modules:
                 module=wiring_modules[barstr]
@@ -407,7 +412,7 @@ def write_files(filename_append,bars,nodes_xyz):
             neighbornodes=[]
             neighborbars=[]
             for bar in bars:
-                if node in bar:
+                if node in bar and bar not in removed_bars:
                     othernode=get_other_node(bar,node)
                     neighbornodes.append(othernode)
                     neighborbars.append(bar_to_str(bar))
@@ -472,7 +477,7 @@ def write_files(filename_append,bars,nodes_xyz):
             adjacentbars=[]
             for node in bar:
                 for bar_in_whole_model in bars:
-                    if node in bar_in_whole_model:
+                    if node in bar_in_whole_model and bar_in_whole_model not in removed_bars:
                         othernode=get_other_node(bar_in_whole_model,node)
                         adjacentnodes.append(othernode)
                         adjacentbars.append(bar_to_str(bar_in_whole_model))
@@ -520,9 +525,12 @@ if __name__=="__main__":
     active_bars, active_nodes = get_subset_bars_and_nodes()
     write_files(filename_append,active_bars,active_nodes_xyz)
 
-    filename_append = "Playa_Brain" #"Eulerian_unfuck"
+    filename_append = "Playa_Brain2" #"Eulerian_unfuck"
     active_bars, active_nodes = get_subset_bars_and_nodes()
     active_bars=eulerian_unfuck(active_bars,active_nodes,all_bars)
+    for bar in removed_bars:
+        if bar in active_bars:
+            active_bars.remove(bar)
     write_files(filename_append,active_bars,active_nodes_xyz)
 
     #srsly wtf shutil this should have been one line of code
@@ -531,11 +539,15 @@ if __name__=="__main__":
     #okay fine I'll write the csv and shut up
     #edit: whoops missed a thing god damn it
     with open('Node_to_node_in_strip_pixel_order.csv','rb') as f:
-        with open('mapping_datasets/Playa_Brain/Node_to_node_in_strip_pixel_order.csv','wb') as fout:
+        with open('mapping_datasets/Playa_Brain2/Node_to_node_in_strip_pixel_order.csv','wb') as fout:
             rdr=csv.reader(f)
             wrtr=csv.writer(fout)
             for row in rdr:
-                wrtr.writerow(row)
+                row2=row
+                if row2[0]!="Strip":
+                    if int(row2[0])>=4:
+                        row2[0]=str(int(row2[0])+3)
+                wrtr.writerow(row2)
 
 
     
