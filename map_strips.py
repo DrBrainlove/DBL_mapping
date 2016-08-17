@@ -43,14 +43,14 @@ def make_nodes_in_order(firstnode,bar):
 	return (node1,node2)
 
 
-module_jsons=	["r4_184635_M1_G2_R2_A2_mapping_313688.json",
+"""module_jsons=	["r4_184635_M1_G2_R2_A2_mapping_313688.json",
 				"r4_185625_M2_G0_R1_A2_mapping_368412.json",
 				"r4_190403_M3_G0_R2_A2_mapping_305101.json",
 				"r4_191013_M4_G1_R1_A1_mapping_152409.json",
 				"r4_192113_M5_G1_R2_A1_mapping_301586.json",
 				"r4_193223_M6_G1_R1_A1_mapping_445551.json",
 				"r4_194128_M7_G0_R1_A0_mapping_407942.json",
-				"r4_194610_M8_G0_R1_A1_mapping_157810.json"]
+				"r4_194610_M8_G0_R1_A1_mapping_157810.json"]"""
 
 
 
@@ -60,7 +60,7 @@ leds_in_strip=0
 outputnodes=[]
 for modu,mj in enumerate(module_jsons):
 	modnumber=modu+1
-	modulething=json.load(open("possible_mappings/"+mj,"r"))
+	modulething=json.load(open("possible_mappings_2016/160810_5/"+mj,"r"))
 	origin_node=modulething[6]
 	print modnumber,origin_node
 	othernodes=modulething[7]

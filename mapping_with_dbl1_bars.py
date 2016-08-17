@@ -59,7 +59,43 @@ def get_subset_bars_and_nodes():
    #         subset_nodes.append(node)"""
     return subset_bars, subset_nodes
 
+def get_snowflake_bars_and_nodes():
+    snowflake_bars=[]
+    snowflake_nodes=[]
+    for x in range(1,7):
+        node1="100"
+        node2="1"+str(x)+"0"
+        snowflake_bars.append(set([node1,node2]))
+        node1=node2
+        node2="1"+str(x)+"2"
+        snowflake_bars.append(set([node1,node2]))
+        node1="1"+str(x)+"1"
+        node2="1"+str(x)+"0"
+        snowflake_bars.append(set([node1,node2]))
+        node1="1"+str(x)+"0"
+        node2="1"+str(x)+"3"
+        snowflake_bars.append(set([node1,node2]))
+    for bar in snowflake_bars:
+        for node in bar:
+            if node not in snowflake_nodes:
+                snowflake_nodes.append(node)
+    return snowflake_bars,snowflake_nodes
 
+
+
+def get_snode_xyz():
+    node_xyz=collections.defaultdict()
+    with open("snowflake_nodes.csv","rU") as f:
+        rdr=csv.reader(f)
+        for line in rdr:
+            node=str(line[0])
+            x=float(line[1])
+            y=float(line[2])
+            z=float(line[3])
+            if node!="FEW":
+                node_xyz[node]=[x,y,z] 
+    return node_xyz
+    
 
 
 def get_node_xyz():
@@ -366,6 +402,7 @@ def write_files(filename_append,bars,nodes_xyz):
                 bars_in_load_order.append(bar)
         for bar in bars_in_load_order:
             barstr=bar_to_str(bar)
+            print bar
             node_1=sorted(list(bar))[0]
             node_2=sorted(list(bar))[1]
             node_1_xyz = nodes_xyz[node_1]
@@ -379,11 +416,11 @@ def write_files(filename_append,bars,nodes_xyz):
             module=1 #no moar modules but keeping this here in case we end up using them to divvy up where shit goes
             if barstr in wiring_modules:
                 module=wiring_modules[barstr]
-            bar_len,num_pixels=get_bar_len_led_info(bar)
+            bar_len,num_pixels=0,0#get_bar_len_led_info(bar)
             barlen_for_calc=xyz_dist(node_1_xyz,node_2_xyz)
 
-            inner_outer_mid=in_out_mid_bars[barstr]
-            leftrightmid=left_right_mid(node_1_xyz,node_2_xyz)
+            inner_outer_mid="inner"
+            leftrightmid="mid"
 
             #3.0 inch space at the end of the bar where the bolt hole is minus 1.5 inches because of where the hole is. this is rough. might need to adjust.
           
@@ -426,10 +463,10 @@ def write_files(filename_append,bars,nodes_xyz):
                 ground="0"
 
             #inner shell or outer shell?
-            inner_outer=in_out_nodes[node]
+            inner_outer="inner"#in_out_nodes[node]
 
             #which hemisphere?
-            leftrightmid=left_right_mid(nodes_xyz[node],nodes_xyz[node])
+            leftrightmid="mid"#left_right_mid(nodes_xyz[node],nodes_xyz[node])
 
             #make the row to put in the file
             row=[node]+nodes_xyz[node]+["DEPRECATED",neighbornodes,neighborbars,"DEPRECATED","DEPRECATED",ground,inner_outer,leftrightmid]
@@ -489,14 +526,14 @@ def write_files(filename_append,bars,nodes_xyz):
             for node in bar:
                 if node not in ground_nodes:
                     ground=0
-            innerouter=in_out_mid_bars[barstr]
+            innerouter="inner"#in_out_mid_bars[barstr]
 
             node_1=sorted(list(bar))[0]
             node_2=sorted(list(bar))[1]
             node_1_xyz = nodes_xyz[node_1]
             node_2_xyz = nodes_xyz[node_2]
 
-            leftrightmid=left_right_mid(node_1_xyz,node_2_xyz)
+            leftrightmid="mid"#left_right_mid(node_1_xyz,node_2_xyz)
             
             row=[barstr,module,min_x,min_y,min_z,max_x,max_y,max_z,nodes,"DEPRECATED","DEPRECATED",adjacentnodes,"DEPRECATED",adjacentbars,"DEPRECATED",ground,innerouter,leftrightmid]
             wrtr.writerow(row)
@@ -515,7 +552,7 @@ if __name__=="__main__":
 
     bar_subsets = []
 
-    filename_append = "Full_Brain_DBL1"
+    """filename_append = "Full_Brain_DBL1"
     all_bars = get_bars()
     active_nodes_xyz=get_node_xyz()
     write_files(filename_append,all_bars,active_nodes_xyz)
@@ -531,6 +568,12 @@ if __name__=="__main__":
     for bar in removed_bars:
         if bar in active_bars:
             active_bars.remove(bar)
+    write_files(filename_append,active_bars,active_nodes_xyz)"""
+
+
+    filename_append = "Snowflake"
+    active_nodes_xyz=get_snode_xyz()
+    active_bars, active_nodes = get_snowflake_bars_and_nodes()
     write_files(filename_append,active_bars,active_nodes_xyz)
 
     #srsly wtf shutil this should have been one line of code

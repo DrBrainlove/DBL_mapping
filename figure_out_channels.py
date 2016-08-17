@@ -2,12 +2,12 @@ import os,csv, math, collections, random, time,datetime, traceback,pickle,json, 
 import numpy as np
 
 
-
-MAX_CHANNELS_TOTAL=48
-MAX_LEDS_PER_CHANNEL=452
-NUM_CONTROLLERS_TOTAL=24 #28 but trying to get away with having four spare
-CHANNELS_PER_RECEIVER=2
-
+NUM_MODULES=8
+MAX_CHANNELS_TOTAL=96
+MAX_LEDS_PER_CHANNEL=180#452
+CHANNELS_PER_RECEIVER=3
+NUM_CONTROLLERS_TOTAL=MAX_CHANNELS_TOTAL/CHANNELS_PER_RECEIVER #28 but trying to get away with having four spare
+RECIEVERS_PER_MODULE=NUM_CONTROLLERS_TOTAL/NUM_MODULES
 
 ground_nodes = ["WAX","AIM","LID","BOX","HUG","FLU","SIR","ONO","TAT","COP","NEW","GET","OAK","CAB","AMP","YAY","HAY","BAM","CIS","OFF","WHO","NIX","PIE","RUM","SIP"]
 
@@ -343,8 +343,6 @@ modulelists=form_new_modules(bars)
 for module in range(1,9):
     (bars,nodes)=modulelists[module]
 
-
-
     for x in range(0,500000):
         if x % 1000==0:
             print x,datetime.datetime.now()
@@ -358,11 +356,11 @@ for module in range(1,9):
         receiver_nodes=set()
         module_origin_startnode="NONE"
         alternative_startnodes=[]
-        for receiver in range(0,3):
+        for receiver in range(0,RECIEVERS_PER_MODULE):
             startnode=random.sample(set(nodes),1)[0]
             receiver_nodes.add(startnode)
             alternative_startnodes=get_adjacent_nodes(module_origin_startnode,bars_remaining)
-            for node_channel in range(0,2):#range(0,RECEIVERS_PER_BASE_NODE*CHANNELS_PER_RECEIVER):
+            for node_channel in range(0,CHANNELS_PER_RECEIVER):#range(0,RECEIVERS_PER_BASE_NODE*CHANNELS_PER_RECEIVER):
                 use_alternative_node=random.randint(0,1)
                 if use_alternative_node:
                     try:
