@@ -446,8 +446,6 @@ def write_files(filename_append,bars,nodes_xyz):
             strip=9999 #set strip number to 9999 if not specified
             if barstr in bar_strip_numbers_dict:
                 strip=int(bar_strip_numbers_dict[barstr])
-                if strip>=4:
-                    strip=strip+3
                 strip=str(strip)
             module=1 #no moar modules but keeping this here in case we end up using them to divvy up where shit goes
             if barstr in wiring_modules:
